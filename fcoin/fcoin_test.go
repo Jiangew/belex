@@ -1,7 +1,7 @@
 package fcoin
 
 import (
-	"github.com/jiangew/belex"
+	"github.com/jiangew/belex/exchange"
 	"net"
 	"net/http"
 	"net/url"
@@ -23,11 +23,11 @@ var ft = NewFCoin(&http.Client{
 }, "", "")
 
 func TestFCoin_GetTicker(t *testing.T) {
-	t.Log(ft.GetTicker(belex.NewCurrencyPair2("BTC_USDT")))
+	t.Log(ft.GetTicker(exchange.NewCurrencyPair2("BTC_USDT")))
 }
 
 func TestFCoin_GetDepth(t *testing.T) {
-	dep, _ := ft.GetDepth(1, belex.BTC_USDT)
+	dep, _ := ft.GetDepth(1, exchange.BTC_USDT)
 	t.Log(dep.AskList)
 	t.Log(dep.BidList)
 }
@@ -38,25 +38,25 @@ func TestFCoin_GetAccount(t *testing.T) {
 }
 
 func TestFCoin_LimitBuy(t *testing.T) {
-	t.Log(ft.LimitBuy("0.01", "100", belex.ETC_USD))
+	t.Log(ft.LimitBuy("0.01", "100", exchange.ETC_USD))
 }
 
 func TestFCoin_LimitSell(t *testing.T) {
-	t.Log(ft.LimitSell("0.01", "50", belex.ETC_USD))
+	t.Log(ft.LimitSell("0.01", "50", exchange.ETC_USD))
 }
 
 func TestFCoin_GetOneOrder(t *testing.T) {
-	t.Log(ft.GetOneOrder("KRcowt_w79qxcBdooYb-RxtZ_67TFcme7eUXU8bMusg=", belex.ETC_USDT))
+	t.Log(ft.GetOneOrder("KRcowt_w79qxcBdooYb-RxtZ_67TFcme7eUXU8bMusg=", exchange.ETC_USDT))
 }
 
 func TestFCoin_CancelOrder(t *testing.T) {
-	t.Log(ft.CancelOrder("-MR0CItwW-rpSFJau7bfCyUBrw9nrkLNipV9odvPlRQ=", belex.ETC_USDT))
+	t.Log(ft.CancelOrder("-MR0CItwW-rpSFJau7bfCyUBrw9nrkLNipV9odvPlRQ=", exchange.ETC_USDT))
 }
 
 func TestFCoin_GetUnfinishOrders(t *testing.T) {
-	t.Log(ft.GetUnfinishOrders(belex.ETC_USDT))
+	t.Log(ft.GetUnfinishOrders(exchange.ETC_USDT))
 }
 
 func TestFCoin_GetOrderHistorys(t *testing.T) {
-	t.Log(ft.GetOrderHistorys(belex.BTC_USDT, 1, 1))
+	t.Log(ft.GetOrderHistorys(exchange.BTC_USDT, 1, 1))
 }

@@ -2,7 +2,7 @@ package fcoin
 
 import (
 	"fmt"
-	"github.com/jiangew/belex"
+	"github.com/jiangew/belex/exchange"
 	"net"
 	"net/http"
 	"net/url"
@@ -28,36 +28,36 @@ func init() {
 	fcws.SetCallbacks(printfTicker, printfDepth, printfTrade, printfKline)
 }
 
-func printfTicker(ticker *belex.Ticker) {
+func printfTicker(ticker *exchange.Ticker) {
 	fmt.Println(ticker)
 }
-func printfDepth(depth *belex.Depth) {
+func printfDepth(depth *exchange.Depth) {
 	fmt.Println(depth)
 }
-func printfTrade(trade *belex.Trade) {
+func printfTrade(trade *exchange.Trade) {
 	fmt.Println(trade)
 }
-func printfKline(kline *belex.Kline, period int) {
+func printfKline(kline *exchange.Kline, period int) {
 	fmt.Println(kline)
 }
 
 func TestFCoinWs_GetTickerWithWs(t *testing.T) {
 	return
-	fcws.SubscribeTicker(belex.BTC_USDT)
+	fcws.SubscribeTicker(exchange.BTC_USDT)
 	time.Sleep(time.Second * 10)
 }
 func TestFCoinWs_GetDepthWithWs(t *testing.T) {
 	return
-	fcws.SubscribeDepth(belex.BTC_USDT, 20)
+	fcws.SubscribeDepth(exchange.BTC_USDT, 20)
 	time.Sleep(time.Second * 10)
 }
 func TestFCoinWs_GetKLineWithWs(t *testing.T) {
 	//return
-	fcws.SubscribeKline(belex.BTC_USDT, belex.KLINE_PERIOD_1MIN)
+	fcws.SubscribeKline(exchange.BTC_USDT, exchange.KLINE_PERIOD_1MIN)
 	time.Sleep(time.Second * 120)
 }
 func TestFCoinWs_GetTradesWithWs(t *testing.T) {
 	return
-	fcws.SubscribeTrade(belex.BTC_USDT)
+	fcws.SubscribeTrade(exchange.BTC_USDT)
 	time.Sleep(time.Second * 10)
 }

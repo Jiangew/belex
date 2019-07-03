@@ -3,7 +3,7 @@ package builder
 import (
 	"context"
 	"fmt"
-	. "github.com/jiangew/belex"
+	"github.com/jiangew/belex/exchange"
 	"github.com/jiangew/belex/fcoin"
 	"net"
 	"net/http"
@@ -150,10 +150,10 @@ func (builder *APIBuilder) ApiPassphrase(apiPassphrase string) (_builder *APIBui
 	return builder
 }
 
-func (builder *APIBuilder) Build(exName string) (api API) {
-	var _api API
+func (builder *APIBuilder) Build(exName string) (api exchange.API) {
+	var _api exchange.API
 	switch exName {
-	case FCOIN:
+	case exchange.FCOIN:
 		_api = fcoin.NewFCoin(builder.client, builder.apiKey, builder.secretkey)
 	default:
 		println("exchange name error [" + exName + "].")

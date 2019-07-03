@@ -1,4 +1,4 @@
-package belex
+package exchange
 
 //http request 工具函数
 import (

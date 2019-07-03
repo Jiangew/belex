@@ -3,7 +3,7 @@ package fcoin
 import (
 	"errors"
 	"fmt"
-	. "github.com/jiangew/belex"
+	"github.com/jiangew/belex/exchange"
 	"github.com/json-iterator/go"
 	"math/rand"
 	"net/http"
@@ -25,14 +25,14 @@ const (
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type FCoinWs struct {
-	*WsBuilder
+	*exchange.WsBuilder
 	sync.Once
-	wsConn *WsConn
+	wsConn *exchange.WsConn
 
-	tickerCallback func(*Ticker)
-	depthCallback  func(*Depth)
-	tradeCallback  func(*Trade)
-	klineCallback  func(*Kline, int)
+	tickerCallback func(*exchange.Ticker)
+	depthCallback  func(*exchange.Depth)
+	tradeCallback  func(*exchange.Trade)
+	klineCallback  func(*exchange.Kline, int)
 
 	clientId      string
 	subcribeTypes []string
@@ -41,36 +41,36 @@ type FCoinWs struct {
 }
 
 var _INERNAL_KLINE_PERIOD_CONVERTER = map[int]string{
-	KLINE_PERIOD_1MIN:   "M1",
-	KLINE_PERIOD_3MIN:   "M3",
-	KLINE_PERIOD_5MIN:   "M5",
-	KLINE_PERIOD_15MIN:  "M15",
-	KLINE_PERIOD_30MIN:  "M30",
-	KLINE_PERIOD_60MIN:  "H1",
-	KLINE_PERIOD_4H:     "H4",
-	KLINE_PERIOD_6H:     "H6",
-	KLINE_PERIOD_1DAY:   "D1",
-	KLINE_PERIOD_1WEEK:  "W1",
-	KLINE_PERIOD_1MONTH: "MN",
+	exchange.KLINE_PERIOD_1MIN:   "M1",
+	exchange.KLINE_PERIOD_3MIN:   "M3",
+	exchange.KLINE_PERIOD_5MIN:   "M5",
+	exchange.KLINE_PERIOD_15MIN:  "M15",
+	exchange.KLINE_PERIOD_30MIN:  "M30",
+	exchange.KLINE_PERIOD_60MIN:  "H1",
+	exchange.KLINE_PERIOD_4H:     "H4",
+	exchange.KLINE_PERIOD_6H:     "H6",
+	exchange.KLINE_PERIOD_1DAY:   "D1",
+	exchange.KLINE_PERIOD_1WEEK:  "W1",
+	exchange.KLINE_PERIOD_1MONTH: "MN",
 }
 var _INERNAL_KLINE_PERIOD_REVERTER = map[string]int{
-	"M1":  KLINE_PERIOD_1MIN,
-	"M3":  KLINE_PERIOD_3MIN,
-	"M5":  KLINE_PERIOD_5MIN,
-	"M15": KLINE_PERIOD_15MIN,
-	"M30": KLINE_PERIOD_30MIN,
-	"H1":  KLINE_PERIOD_60MIN,
-	"H4":  KLINE_PERIOD_4H,
-	"H6":  KLINE_PERIOD_6H,
-	"D1":  KLINE_PERIOD_1DAY,
-	"W1":  KLINE_PERIOD_1WEEK,
-	"MN":  KLINE_PERIOD_1MONTH,
+	"M1":  exchange.KLINE_PERIOD_1MIN,
+	"M3":  exchange.KLINE_PERIOD_3MIN,
+	"M5":  exchange.KLINE_PERIOD_5MIN,
+	"M15": exchange.KLINE_PERIOD_15MIN,
+	"M30": exchange.KLINE_PERIOD_30MIN,
+	"H1":  exchange.KLINE_PERIOD_60MIN,
+	"H4":  exchange.KLINE_PERIOD_4H,
+	"H6":  exchange.KLINE_PERIOD_6H,
+	"D1":  exchange.KLINE_PERIOD_1DAY,
+	"W1":  exchange.KLINE_PERIOD_1WEEK,
+	"MN":  exchange.KLINE_PERIOD_1MONTH,
 }
 
 func NewFCoinWs(client *http.Client) *FCoinWs {
 	fcWs := &FCoinWs{}
 	fcWs.clientId = getRandomString(8)
-	fcWs.WsBuilder = NewWsBuilder().
+	fcWs.WsBuilder = exchange.NewWsBuilder().
 		WsUrl("wss://api.fcoin.com/v2/ws").
 		Heartbeat2(func() interface{} {
 			ts := time.Now().Unix()*1000 + fcWs.timeoffset*1000
@@ -83,7 +83,7 @@ func NewFCoinWs(client *http.Client) *FCoinWs {
 
 		}, 25*time.Second).
 		ReconnectIntervalTime(24 * time.Hour).
-		UnCompressFunc(FlateUnCompress).
+		UnCompressFunc(exchange.FlateUnCompress).
 		ProtoHandleFunc(fcWs.handle)
 	fc := NewFCoin(client, "", "")
 	fcWs.tradeSymbols = fc.tradeSymbols
@@ -106,10 +106,10 @@ func getRandomString(length int) string {
 }
 
 func (fcWs *FCoinWs) SetCallbacks(
-	tickerCallback func(*Ticker),
-	depthCallback func(*Depth),
-	tradeCallback func(*Trade),
-	klineCallback func(*Kline, int),
+	tickerCallback func(*exchange.Ticker),
+	depthCallback func(*exchange.Depth),
+	tradeCallback func(*exchange.Trade),
+	klineCallback func(*exchange.Kline, int),
 ) {
 	fcWs.tickerCallback = tickerCallback
 	fcWs.depthCallback = depthCallback
@@ -122,7 +122,7 @@ func (fcWs *FCoinWs) subscribe(sub map[string]interface{}) error {
 	return fcWs.wsConn.Subscribe(sub)
 }
 
-func (fcWs *FCoinWs) SubscribeDepth(pair CurrencyPair, size int) error {
+func (fcWs *FCoinWs) SubscribeDepth(pair exchange.CurrencyPair, size int) error {
 	if fcWs.depthCallback == nil {
 		return errors.New("please set depth callback func")
 	}
@@ -136,7 +136,7 @@ func (fcWs *FCoinWs) SubscribeDepth(pair CurrencyPair, size int) error {
 		"args": args})
 }
 
-func (fcWs *FCoinWs) SubscribeTicker(pair CurrencyPair) error {
+func (fcWs *FCoinWs) SubscribeTicker(pair exchange.CurrencyPair) error {
 	if fcWs.tickerCallback == nil {
 		return errors.New("please set ticker callback func")
 	}
@@ -150,7 +150,7 @@ func (fcWs *FCoinWs) SubscribeTicker(pair CurrencyPair) error {
 		"args": args})
 }
 
-func (fcWs *FCoinWs) SubscribeTrade(pair CurrencyPair) error {
+func (fcWs *FCoinWs) SubscribeTrade(pair exchange.CurrencyPair) error {
 	if fcWs.tradeCallback == nil {
 		return errors.New("please set trade callback func")
 	}
@@ -164,7 +164,7 @@ func (fcWs *FCoinWs) SubscribeTrade(pair CurrencyPair) error {
 		"args": args})
 }
 
-func (fcWs *FCoinWs) SubscribeKline(pair CurrencyPair, period int) error {
+func (fcWs *FCoinWs) SubscribeKline(pair exchange.CurrencyPair, period int) error {
 	if fcWs.klineCallback == nil {
 		return errors.New("place set kline callback func")
 	}
@@ -190,31 +190,31 @@ func (fcWs *FCoinWs) connectWs() {
 	})
 }
 
-func (fcWs *FCoinWs) parseTickerData(tickmap []interface{}) *Ticker {
-	t := new(Ticker)
+func (fcWs *FCoinWs) parseTickerData(tickmap []interface{}) *exchange.Ticker {
+	t := new(exchange.Ticker)
 	t.Date = uint64(time.Now().UnixNano() / 1000000)
-	t.Last = ToFloat64(tickmap[0])
-	t.Vol = ToFloat64(tickmap[9])
-	t.Low = ToFloat64(tickmap[8])
-	t.High = ToFloat64(tickmap[7])
-	t.Buy = ToFloat64(tickmap[2])
-	t.Sell = ToFloat64(tickmap[4])
+	t.Last = exchange.ToFloat64(tickmap[0])
+	t.Vol = exchange.ToFloat64(tickmap[9])
+	t.Low = exchange.ToFloat64(tickmap[8])
+	t.High = exchange.ToFloat64(tickmap[7])
+	t.Buy = exchange.ToFloat64(tickmap[2])
+	t.Sell = exchange.ToFloat64(tickmap[4])
 
 	return t
 }
 
-func (fcWs *FCoinWs) parseDepthData(bids, asks []interface{}) *Depth {
-	depth := new(Depth)
+func (fcWs *FCoinWs) parseDepthData(bids, asks []interface{}) *exchange.Depth {
+	depth := new(exchange.Depth)
 	n := 0
 	for i := 0; i < len(bids); {
-		depth.BidList = append(depth.BidList, DepthRecord{ToFloat64(bids[i]), ToFloat64(bids[i+1])})
+		depth.BidList = append(depth.BidList, exchange.DepthRecord{exchange.ToFloat64(bids[i]), exchange.ToFloat64(bids[i+1])})
 		i += 2
 		n++
 	}
 
 	n = 0
 	for i := 0; i < len(asks); {
-		depth.AskList = append(depth.AskList, DepthRecord{ToFloat64(asks[i]), ToFloat64(asks[i+1])})
+		depth.AskList = append(depth.AskList, exchange.DepthRecord{exchange.ToFloat64(asks[i]), exchange.ToFloat64(asks[i+1])})
 		i += 2
 		n++
 	}
@@ -222,15 +222,15 @@ func (fcWs *FCoinWs) parseDepthData(bids, asks []interface{}) *Depth {
 	return depth
 }
 
-func (fcWs *FCoinWs) parseKlineData(tickmap []interface{}) *Ticker {
-	t := new(Ticker)
+func (fcWs *FCoinWs) parseKlineData(tickmap []interface{}) *exchange.Ticker {
+	t := new(exchange.Ticker)
 	t.Date = uint64(time.Now().UnixNano() / 1000000)
-	t.Last = ToFloat64(tickmap[0])
-	t.Vol = ToFloat64(tickmap[9])
-	t.Low = ToFloat64(tickmap[8])
-	t.High = ToFloat64(tickmap[7])
-	t.Buy = ToFloat64(tickmap[2])
-	t.Sell = ToFloat64(tickmap[4])
+	t.Last = exchange.ToFloat64(tickmap[0])
+	t.Vol = exchange.ToFloat64(tickmap[9])
+	t.Low = exchange.ToFloat64(tickmap[8])
+	t.High = exchange.ToFloat64(tickmap[7])
+	t.Buy = exchange.ToFloat64(tickmap[2])
+	t.Sell = exchange.ToFloat64(tickmap[4])
 
 	return t
 }
@@ -250,7 +250,7 @@ func (fcWs *FCoinWs) handle(msg []byte) error {
 		switch resp[0] {
 		case "hello", "ping":
 			fcWs.wsConn.UpdateActiveTime()
-			stime := int64(ToInt(datamap["ts"]))
+			stime := int64(exchange.ToInt(datamap["ts"]))
 			st := time.Unix(0, stime*1000*1000)
 			lt := time.Now()
 			offset := st.Sub(lt).Seconds()
@@ -266,7 +266,7 @@ func (fcWs *FCoinWs) handle(msg []byte) error {
 			return nil
 		case "depth":
 			dep := fcWs.parseDepthData(datamap["bids"].([]interface{}), datamap["asks"].([]interface{}))
-			stime := int64(ToInt(datamap["ts"]))
+			stime := int64(exchange.ToInt(datamap["ts"]))
 			dep.UTime = time.Unix(stime/1000, 0)
 			pair, err := fcWs.getPairFromType(resp[2])
 			if err != nil {
@@ -278,13 +278,13 @@ func (fcWs *FCoinWs) handle(msg []byte) error {
 			return nil
 		case "candle":
 			period := _INERNAL_KLINE_PERIOD_REVERTER[resp[1]]
-			kline := &Kline{
-				Timestamp: int64(ToInt(datamap["id"])),
-				Open:      ToFloat64(datamap["open"]),
-				Close:     ToFloat64(datamap["close"]),
-				High:      ToFloat64(datamap["high"]),
-				Low:       ToFloat64(datamap["low"]),
-				Vol:       ToFloat64(datamap["quote_vol"]),
+			kline := &exchange.Kline{
+				Timestamp: int64(exchange.ToInt(datamap["id"])),
+				Open:      exchange.ToFloat64(datamap["open"]),
+				Close:     exchange.ToFloat64(datamap["close"]),
+				High:      exchange.ToFloat64(datamap["high"]),
+				Low:       exchange.ToFloat64(datamap["low"]),
+				Vol:       exchange.ToFloat64(datamap["quote_vol"]),
 			}
 			pair, err := fcWs.getPairFromType(resp[2])
 			if err != nil {
@@ -294,16 +294,16 @@ func (fcWs *FCoinWs) handle(msg []byte) error {
 			fcWs.klineCallback(kline, period)
 			return nil
 		case "trade":
-			side := BUY
+			side := exchange.BUY
 			if datamap["side"] == "sell" {
-				side = SELL
+				side = exchange.SELL
 			}
-			trade := &Trade{
-				Tid:    int64(ToUint64(datamap["id"])),
-				Type:   TradeSide(side),
-				Amount: ToFloat64(datamap["amount"]),
-				Price:  ToFloat64(datamap["price"]),
-				Date:   int64(ToUint64(datamap["ts"])),
+			trade := &exchange.Trade{
+				Tid:    int64(exchange.ToUint64(datamap["id"])),
+				Type:   exchange.TradeSide(side),
+				Amount: exchange.ToFloat64(datamap["amount"]),
+				Price:  exchange.ToFloat64(datamap["price"]),
+				Date:   int64(exchange.ToUint64(datamap["ts"])),
 			}
 			pair, err := fcWs.getPairFromType(resp[1])
 			if err != nil {
@@ -320,11 +320,11 @@ func (fcWs *FCoinWs) handle(msg []byte) error {
 	return nil
 }
 
-func (fcWs *FCoinWs) getPairFromType(pair string) (CurrencyPair, error) {
+func (fcWs *FCoinWs) getPairFromType(pair string) (exchange.CurrencyPair, error) {
 	for _, v := range fcWs.tradeSymbols {
 		if v.Name == pair {
-			return NewCurrencyPair2(v.BaseCurrency + "_" + v.QuoteCurrency), nil
+			return exchange.NewCurrencyPair2(v.BaseCurrency + "_" + v.QuoteCurrency), nil
 		}
 	}
-	return NewCurrencyPair2("" + "_" + ""), errors.New("pair not support :" + pair)
+	return exchange.NewCurrencyPair2("" + "_" + ""), errors.New("pair not support :" + pair)
 }

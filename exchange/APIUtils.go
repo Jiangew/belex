@@ -1,4 +1,4 @@
-package belex
+package exchange
 
 import (
 	"errors"

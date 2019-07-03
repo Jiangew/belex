@@ -1,7 +1,7 @@
 package builder
 
 import (
-	"github.com/jiangew/belex"
+	"github.com/jiangew/belex/exchange"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -9,5 +9,5 @@ import (
 var builder = NewAPIBuilder()
 
 func TestAPIBuilder_Build(t *testing.T) {
-	assert.Equal(t, builder.APIKey("").APISecretkey("").Build(belex.FCOIN).GetExchangeName(), belex.FCOIN)
+	assert.Equal(t, builder.APIKey("").APISecretkey("").Build(exchange.FCOIN).GetExchangeName(), exchange.FCOIN)
 }

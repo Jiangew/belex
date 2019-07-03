@@ -1,4 +1,4 @@
-package belex
+package exchange
 
 type ApiError struct {
 	ErrCode,
