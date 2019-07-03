@@ -5,7 +5,6 @@ import (
 	"fmt"
 	. "github.com/jiangew/belex"
 	"github.com/jiangew/belex/fcoin"
-	"github.com/jiangew/belex/huobi"
 	"net"
 	"net/http"
 	"net/url"
@@ -154,8 +153,6 @@ func (builder *APIBuilder) ApiPassphrase(apiPassphrase string) (_builder *APIBui
 func (builder *APIBuilder) Build(exName string) (api API) {
 	var _api API
 	switch exName {
-	case HUOBI_PRO:
-		_api = huobi.NewHuoBiProSpot(builder.client, builder.apiKey, builder.secretkey)
 	case FCOIN:
 		_api = fcoin.NewFCoin(builder.client, builder.apiKey, builder.secretkey)
 	default:
@@ -163,14 +160,4 @@ func (builder *APIBuilder) Build(exName string) (api API) {
 
 	}
 	return _api
-}
-
-func (builder *APIBuilder) BuildFuture(exName string) (api FutureRestAPI) {
-	switch exName {
-	case HBDM:
-		return huobi.NewHbdm(&APIConfig{HttpClient: builder.client, ApiKey: builder.apiKey, ApiSecretKey: builder.secretkey})
-	default:
-		println(fmt.Sprintf("%s not support future", exName))
-		return nil
-	}
 }

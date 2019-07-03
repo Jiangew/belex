@@ -101,9 +101,6 @@ var (
 
 //exchanges const
 const (
-	HUOBI       = "huobi.com"
-	HUOBI_PRO   = "huobi.pro"
 	FCOIN       = "fcoin.com"
-	BITMEX      = "bitmex.com"
-	HBDM        = "hbdm.com"
+	FCOIN_PRO	= "fcoin.pro"
 )

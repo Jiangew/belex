@@ -3,8 +3,8 @@ package fcoin
 import (
 	"errors"
 	"fmt"
-	"github.com/json-iterator/go"
 	. "github.com/jiangew/belex"
+	"github.com/json-iterator/go"
 	"math/rand"
 	"net/http"
 	"strings"

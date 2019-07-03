@@ -14,7 +14,7 @@ BELEX 项目是为了统一并标准化各个数字资产交易平台的接口�
    
    func main() {
    	apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second)
-   	//apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second).HttpProxy("socks5://127.0.0.1:1080")
+   	//apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second).HttpProxy("socks5://127.0.0.1:1087")
    	
    	//build spot api
    	//api := apiBuilder.APIKey("").APISecretkey("").ClientID("123").Build(belex.BITSTAMP)
@@ -30,8 +30,8 @@ BELEX 项目是为了统一并标准化各个数字资产交易平台的接口�
    	log.Println(futureApi.GetExchangeName())
    	log.Println(futureApi.GetFutureTicker(belex.BTC_USD, belex.QUARTER_CONTRACT))
    	log.Println(futureApi.GetFutureDepth(belex.BTC_USD, belex.QUARTER_CONTRACT, 5))
-   	//log.Println(futureApi.GetFutureUserinfo()) // account
-   	//log.Println(futureApi.GetFuturePosition(belex.BTC_USD , belex.QUARTER_CONTRACT))//position info
+   	//log.Println(futureApi.GetFutureUserinfo()) //account
+   	//log.Println(futureApi.GetFuturePosition(belex.BTC_USD , belex.QUARTER_CONTRACT)) //position info
    }
 ```
 

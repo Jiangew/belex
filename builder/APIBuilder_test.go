@@ -9,6 +9,5 @@ import (
 var builder = NewAPIBuilder()
 
 func TestAPIBuilder_Build(t *testing.T) {
-	assert.Equal(t, builder.APIKey("").APISecretkey("").Build(belex.HUOBI_PRO).GetExchangeName(), belex.HUOBI_PRO)
-	assert.Equal(t, builder.APIKey("").APISecretkey("").BuildFuture(belex.HBDM).GetExchangeName(), belex.HBDM)
+	assert.Equal(t, builder.APIKey("").APISecretkey("").Build(belex.FCOIN).GetExchangeName(), belex.FCOIN)
 }

@@ -33,7 +33,7 @@ func TestNewWsConn(t *testing.T) {
 	fmt.Println(ping2)
 	fmt.Println(err, string(ping3))
 
-	ws := NewWsBuilder().Dump().WsUrl("wss://api.fcoin.com/v2/ws").ProxyUrl("socks5://127.0.0.1:1080").
+	ws := NewWsBuilder().Dump().WsUrl("wss://api.fcoin.com/v2/ws").ProxyUrl("socks5://127.0.0.1:1087").
 		Heartbeat([]byte(ping3), 5*time.Second).ProtoHandleFunc(ProtoHandle).Build()
 	//t.Log(ws.Subscribe(map[string]string{
 	//	//"cmd":"sub", "args":"[\"ticker.btcusdt\"]", "id": clientId}))
