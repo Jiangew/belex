@@ -155,6 +155,8 @@ func (builder *APIBuilder) Build(exName string) (api exchange.API) {
 	switch exName {
 	case exchange.FCOIN:
 		_api = fcoin.NewFCoin(builder.client, builder.apiKey, builder.secretkey)
+	case exchange.FCOIN_PRO:
+		_api = fcoin.NewFCoin(builder.client, builder.apiKey, builder.secretkey)
 	default:
 		println("exchange name error [" + exName + "].")
 

@@ -24,20 +24,21 @@ type CurrencyPair struct {
 var (
 	UNKNOWN = Currency{"UNKNOWN", ""}
 
-	USD     = Currency{"USD", ""}
-	USDT    = Currency{"USDT", ""}
-	PAX     = Currency{"PAX", "https://www.paxos.com"}
-	USDC    = Currency{"USDC", "https://www.centre.io"}
+	USD  = Currency{"USD", ""}
+	USDT = Currency{"USDT", ""}
+	PAX  = Currency{"PAX", "https://www.paxos.com"}
+	USDC = Currency{"USDC", "https://www.centre.io"}
 
-	BTC     = Currency{"BTC", "https://bitcoin.org"}
-	BCH     = Currency{"BCH", ""}
-	BSV     = Currency{"BSV", ""}
-	LTC     = Currency{"LTC", ""}
-	ETH     = Currency{"ETH", ""}
-	ETC     = Currency{"ETC", ""}
-	EOS     = Currency{"EOS", ""}
-	XRP     = Currency{"XRP", ""}
-	FT      = Currency{"FT", "FCoin Token"}
+	BTC  = Currency{"BTC", "https://bitcoin.org"}
+	BCH  = Currency{"BCH", ""}
+	BSV  = Currency{"BSV", ""}
+	LTC  = Currency{"LTC", ""}
+	ETH  = Currency{"ETH", ""}
+	ETC  = Currency{"ETC", ""}
+	EOS  = Currency{"EOS", ""}
+	XRP  = Currency{"XRP", ""}
+	FT   = Currency{"FT", "FCoin Token"}
+	FMEX = Currency{"FMEX", "FCoin Future Token"}
 
 	BTC_USD = CurrencyPair{BTC, USD}
 	LTC_USD = CurrencyPair{LTC, USD}
@@ -48,15 +49,16 @@ var (
 	XRP_USD = CurrencyPair{XRP, USD}
 	EOS_USD = CurrencyPair{EOS, USD}
 
-	BTC_USDT = CurrencyPair{BTC, USDT}
-	LTC_USDT = CurrencyPair{LTC, USDT}
-	BCH_USDT = CurrencyPair{BCH, USDT}
-	BSV_USDT = CurrencyPair{BSV, USDT}
-	ETH_USDT = CurrencyPair{ETH, USDT}
-	ETC_USDT = CurrencyPair{ETC, USDT}
-	EOS_USDT = CurrencyPair{EOS, USDT}
-	XRP_USDT = CurrencyPair{XRP, USDT}
-	FT_USDT  = CurrencyPair{FT, USDT}
+	BTC_USDT  = CurrencyPair{BTC, USDT}
+	LTC_USDT  = CurrencyPair{LTC, USDT}
+	BCH_USDT  = CurrencyPair{BCH, USDT}
+	BSV_USDT  = CurrencyPair{BSV, USDT}
+	ETH_USDT  = CurrencyPair{ETH, USDT}
+	ETC_USDT  = CurrencyPair{ETC, USDT}
+	EOS_USDT  = CurrencyPair{EOS, USDT}
+	XRP_USDT  = CurrencyPair{XRP, USDT}
+	FT_USDT   = CurrencyPair{FT, USDT}
+	FMEX_USDT = CurrencyPair{FMEX, USDT}
 
 	LTC_BTC = CurrencyPair{LTC, BTC}
 	ETH_BTC = CurrencyPair{ETH, BTC}
@@ -100,6 +102,8 @@ func NewCurrency(symbol, desc string) Currency {
 		return LTC
 	case "ft", "FT":
 		return FT
+	case "fmex", "FMEX":
+		return FMEX
 	default:
 		return Currency{strings.ToUpper(symbol), desc}
 	}

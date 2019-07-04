@@ -77,7 +77,7 @@ type OrderType int
 
 func (ot OrderType) String() string {
 	if ot > 0 && int(ot) <= len(orderTypeSymbol) {
-		return orderTypeSymbol[ot - 1]
+		return orderTypeSymbol[ot-1]
 	}
 	return fmt.Sprintf("UNKNOWN_ORDER_TYPE(%d)", ot)
 }
@@ -101,6 +101,6 @@ var (
 
 //exchanges const
 const (
-	FCOIN       = "fcoin.com"
-	FCOIN_PRO	= "fcoin.pro"
+	FCOIN     = "fcoin.com"
+	FCOIN_PRO = "fcoin.pro"
 )

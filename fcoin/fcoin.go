@@ -82,7 +82,6 @@ func (fc *FCoin) GetTicker(currencyPair exchange.CurrencyPair) (*exchange.Ticker
 		return nil, err
 	}
 
-	////log.Println("ticker respmap:", respmap)
 	if respmap["status"].(float64) != 0 {
 		return nil, errors.New(respmap["msg"].(string))
 	}
@@ -100,18 +99,15 @@ func (fc *FCoin) GetTicker(currencyPair exchange.CurrencyPair) (*exchange.Ticker
 
 	ticker := new(exchange.Ticker)
 	ticker.Pair = currencyPair
-	ticker.Date = uint64(time.Now().UnixNano() / 1000000)
+	ticker.Date = uint64(time.Now().UnixNano() / int64(time.Millisecond))
 	ticker.Last = exchange.ToFloat64(tickmap[0])
 	ticker.Vol = exchange.ToFloat64(tickmap[9])
 	ticker.Low = exchange.ToFloat64(tickmap[8])
 	ticker.High = exchange.ToFloat64(tickmap[7])
 	ticker.Buy = exchange.ToFloat64(tickmap[2])
 	ticker.Sell = exchange.ToFloat64(tickmap[4])
-	//ticker.SellAmount = ToFloat64(tickmap[5])
-	//ticker.BuyAmount = ToFloat64(tickmap[3])
 
 	return ticker, nil
-
 }
 
 func (fc *FCoin) GetDepth(size int, currency exchange.CurrencyPair) (*exchange.Depth, error) {
@@ -157,11 +153,10 @@ func (fc *FCoin) GetDepth(size int, currency exchange.CurrencyPair) (*exchange.D
 	}
 
 	//sort.Sort(sort.Reverse(depth.AskList))
-
 	return depth, nil
 }
-func (fc *FCoin) doAuthenticatedRequest(method, uri string, params url.Values) (interface{}, error) {
 
+func (fc *FCoin) doAuthenticatedRequest(method, uri string, params url.Values) (interface{}, error) {
 	timestamp := time.Now().Unix()*1000 + fc.timeoffset*1000
 	sign := fc.buildSigned(method, fc.baseUrl+uri, timestamp, params)
 
@@ -195,6 +190,7 @@ func (fc *FCoin) doAuthenticatedRequest(method, uri string, params url.Values) (
 
 		json.Unmarshal(respbody, &respmap)
 	}
+
 	//log.Println(respmap)
 	if exchange.ToInt(respmap["status"]) != 0 {
 		return nil, errors.New(respmap["msg"].(string))
@@ -204,7 +200,6 @@ func (fc *FCoin) doAuthenticatedRequest(method, uri string, params url.Values) (
 }
 
 func (fc *FCoin) buildSigned(httpmethod string, apiurl string, timestamp int64, para url.Values) string {
-
 	var (
 		param = ""
 		err   error
