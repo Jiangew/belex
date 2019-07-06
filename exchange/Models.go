@@ -5,6 +5,21 @@ import (
 	"time"
 )
 
+type NewOrder struct {
+	ID            string
+	Symbol        CurrencyPair
+	Side          TradeSide
+	OrderType     OrderType
+	Price         float64
+	Amount        float64
+	Status        TradeStatus
+	ExecutedValue string
+	FilledAmount  float64
+	Fee           float64
+	Source        string
+	CreatedAt     uint64
+}
+
 type Order struct {
 	Price      float64
 	Amount     float64
@@ -30,10 +45,12 @@ type Trade struct {
 }
 
 type SubAccount struct {
-	Currency     Currency
-	Amount       float64
-	ForzenAmount float64
-	LoanAmount   float64
+	Currency      Currency
+	Available     float64
+	Frozen        float64
+	DemandDeposit float64
+	LockDeposit   float64
+	Balance       float64
 }
 
 type Account struct {
@@ -44,24 +61,17 @@ type Account struct {
 }
 
 type Ticker struct {
-	Pair CurrencyPair `json:"omitempty"`
-	Last float64      `json:"last,string"`
-	Buy  float64      `json:"buy,string"`
-	Sell float64      `json:"sell,string"`
-	High float64      `json:"high,string"`
-	Low  float64      `json:"low,string"`
-	Vol  float64      `json:"vol,string"`
-	Date uint64       `json:"date"` // 单位:ms
-}
-
-type FutureTicker struct {
-	*Ticker
-	ContractType string  `json:"omitempty"`
-	ContractId   int     `json:"contractId"`
-	LimitHigh    float64 `json:"limitHigh,string"`
-	LimitLow     float64 `json:"limitLow,string"`
-	HoldAmount   float64 `json:"hold_amount,string"`
-	UnitAmount   float64 `json:"unitAmount,string"`
+	Pair    CurrencyPair `json:"omitempty"`
+	Date    uint64       `json:"date"` //ms
+	Last    float64      `json:"last,string"`
+	LastVol float64      `json:"last_vol,string"`
+	Buy     float64      `json:"buy,string"`
+	BuyVol  float64      `json:"buy_vol,string"`
+	Sell    float64      `json:"sell,string"`
+	SellVol float64      `json:"sell_vol,string"`
+	High    float64      `json:"high,string"`
+	Low     float64      `json:"low,string"`
+	Vol     float64      `json:"vol,string"`
 }
 
 type DepthRecord struct {
@@ -87,8 +97,8 @@ type Depth struct {
 	ContractType string //for future
 	Pair         CurrencyPair
 	UTime        time.Time
-	AskList      DepthRecords // Descending order
-	BidList      DepthRecords // Descending order
+	AskList      DepthRecords //Descending order
+	BidList      DepthRecords //Descending order
 }
 
 type APIConfig struct {
@@ -97,9 +107,9 @@ type APIConfig struct {
 	ApiKey        string
 	ApiSecretKey  string
 	ApiPassphrase string //for okex.com v3 api
-	ClientId      string //for bitstamp.net , huobi.pro
+	ClientId      string //for bitstamp.net, huobi.pro
 
-	Lever int //杠杆倍数 , for future
+	Lever int //杠杆倍数, for future
 }
 
 type Kline struct {

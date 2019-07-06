@@ -88,10 +88,6 @@ func NewCurrency(symbol, desc string) Currency {
 	switch symbol {
 	case "usdt", "USDT":
 		return USDT
-	case "usd", "USD":
-		return USD
-	case "usdc", "USDC":
-		return USDC
 	case "pax", "PAX":
 		return PAX
 	case "btc", "BTC":
@@ -100,6 +96,8 @@ func NewCurrency(symbol, desc string) Currency {
 		return BCH
 	case "ltc", "LTC":
 		return LTC
+	case "eos", "EOS":
+		return EOS
 	case "ft", "FT":
 		return FT
 	case "fmex", "FMEX":

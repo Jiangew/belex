@@ -75,6 +75,14 @@ const (
 
 type OrderType int
 
+const (
+	ORDER_TYPE_LIMIT = 1 + iota
+	ORDER_TYPE_MARKET
+	ORDER_TYPE_FAK
+	ORDER_TYPE_IOC
+	ORDER_TYPE_POST_ONLY
+)
+
 func (ot OrderType) String() string {
 	if ot > 0 && int(ot) <= len(orderTypeSymbol) {
 		return orderTypeSymbol[ot-1]
@@ -83,14 +91,6 @@ func (ot OrderType) String() string {
 }
 
 var orderTypeSymbol = [...]string{"LIMIT", "MARKET", "FAK", "IOC", "POST_ONLY"}
-
-const (
-	ORDER_TYPE_LIMIT = 1 + iota
-	ORDER_TYPE_MARKET
-	ORDER_TYPE_FAK
-	ORDER_TYPE_IOC
-	ORDER_TYPE_POST_ONLY
-)
 
 var (
 	THIS_WEEK_CONTRACT = "this_week" //周合约

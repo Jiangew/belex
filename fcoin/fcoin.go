@@ -75,9 +75,7 @@ func (fc *FCoin) setTimeOffset() error {
 }
 
 func (fc *FCoin) GetTicker(currencyPair exchange.CurrencyPair) (*exchange.Ticker, error) {
-	respmap, err := exchange.HttpGet(fc.httpClient, fc.baseUrl+fmt.Sprintf("market/ticker/%s",
-		strings.ToLower(currencyPair.ToSymbol(""))))
-
+	respmap, err := exchange.HttpGet(fc.httpClient, fc.baseUrl+fmt.Sprintf("market/ticker/%s", strings.ToLower(currencyPair.ToSymbol(""))))
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +84,6 @@ func (fc *FCoin) GetTicker(currencyPair exchange.CurrencyPair) (*exchange.Ticker
 		return nil, errors.New(respmap["msg"].(string))
 	}
 
-	//
 	tick, ok := respmap["data"].(map[string]interface{})
 	if !ok {
 		return nil, exchange.API_ERR
@@ -99,13 +96,17 @@ func (fc *FCoin) GetTicker(currencyPair exchange.CurrencyPair) (*exchange.Ticker
 
 	ticker := new(exchange.Ticker)
 	ticker.Pair = currencyPair
-	ticker.Date = uint64(time.Now().UnixNano() / int64(time.Millisecond))
+	ticker.Date = uint64(time.Now().UnixNano() / int64(time.Nanosecond))
+
 	ticker.Last = exchange.ToFloat64(tickmap[0])
-	ticker.Vol = exchange.ToFloat64(tickmap[9])
-	ticker.Low = exchange.ToFloat64(tickmap[8])
-	ticker.High = exchange.ToFloat64(tickmap[7])
+	ticker.LastVol = exchange.ToFloat64(tickmap[1])
 	ticker.Buy = exchange.ToFloat64(tickmap[2])
+	ticker.BuyVol = exchange.ToFloat64(tickmap[3])
 	ticker.Sell = exchange.ToFloat64(tickmap[4])
+	ticker.SellVol = exchange.ToFloat64(tickmap[5])
+	ticker.High = exchange.ToFloat64(tickmap[7])
+	ticker.Low = exchange.ToFloat64(tickmap[8])
+	ticker.Vol = exchange.ToFloat64(tickmap[9])
 
 	return ticker, nil
 }
@@ -121,7 +122,6 @@ func (fc *FCoin) GetDepth(size int, currency exchange.CurrencyPair) (*exchange.D
 	}
 
 	datamap := respmap["data"].(map[string]interface{})
-
 	bids, ok1 := datamap["bids"].([]interface{})
 	asks, ok2 := datamap["asks"].([]interface{})
 
@@ -131,6 +131,7 @@ func (fc *FCoin) GetDepth(size int, currency exchange.CurrencyPair) (*exchange.D
 
 	depth := new(exchange.Depth)
 	depth.Pair = currency
+	depth.UTime = time.Now()
 
 	n := 0
 	for i := 0; i < len(bids); {
@@ -332,7 +333,7 @@ func (fc *FCoin) toOrder(o map[string]interface{}, pair exchange.CurrencyPair) *
 		OrderTime:  exchange.ToInt(o["created_at"])}
 }
 
-func (fc *FCoin) GetOneOrder(orderId string, currency exchange.CurrencyPair) (*exchange.Order, error) {
+func (fc *FCoin) GetOrder(orderId string, currency exchange.CurrencyPair) (*exchange.Order, error) {
 	uri := fmt.Sprintf("orders/%s", orderId)
 	r, err := fc.doAuthenticatedRequest("GET", uri, url.Values{})
 
@@ -363,7 +364,6 @@ func (fc *FCoin) GetUnfinishOrders(currency exchange.CurrencyPair) ([]exchange.O
 	}
 
 	var ords []exchange.Order
-
 	for _, ord := range r.([]interface{}) {
 		ords = append(ords, *fc.toOrder(ord.(map[string]interface{}), currency))
 	}
@@ -466,7 +466,6 @@ func (fc *FCoin) GetOrderHistorys(currency exchange.CurrencyPair, currentPage, p
 }
 
 func (fc *FCoin) GetAccount() (*exchange.Account, error) {
-
 	r, err := fc.doAuthenticatedRequest("GET", "accounts/balance", url.Values{})
 	if err != nil {
 		return nil, err
@@ -474,21 +473,47 @@ func (fc *FCoin) GetAccount() (*exchange.Account, error) {
 
 	acc := new(exchange.Account)
 	acc.SubAccounts = make(map[exchange.Currency]exchange.SubAccount)
-	acc.Exchange = fc.GetExchangeName()
 
 	balances := r.([]interface{})
 	for _, v := range balances {
 		vv := v.(map[string]interface{})
 		currency := exchange.NewCurrency(vv["currency"].(string), "")
 		acc.SubAccounts[currency] = exchange.SubAccount{
-			Currency:     currency,
-			Amount:       exchange.ToFloat64(vv["available"]),
-			ForzenAmount: exchange.ToFloat64(vv["frozen"]),
+			Currency:      currency,
+			Available:     exchange.ToFloat64(vv["available"]),
+			Frozen:        exchange.ToFloat64(vv["frozen"]),
+			DemandDeposit: exchange.ToFloat64(vv["demand_deposit"]),
+			LockDeposit:   exchange.ToFloat64(vv["lock_deposit"]),
+			Balance:       exchange.ToFloat64(vv["balance"]),
 		}
 	}
 
 	return acc, nil
+}
 
+func (fc *FCoin) GetSubAccount(currency exchange.Currency) (*exchange.SubAccount, error) {
+	r, err := fc.doAuthenticatedRequest("GET", "accounts/balance", url.Values{})
+	if err != nil {
+		return nil, err
+	}
+
+	subaccount := new(exchange.SubAccount)
+	balances := r.([]interface{})
+	for _, v := range balances {
+		vv := v.(map[string]interface{})
+		if strings.ToLower(currency.Symbol) != vv["currency"].(string) {
+			continue
+		}
+
+		subaccount.Currency = currency
+		subaccount.Available = exchange.ToFloat64(vv["available"])
+		subaccount.Frozen = exchange.ToFloat64(vv["frozen"])
+		subaccount.DemandDeposit = exchange.ToFloat64(vv["demand_deposit"])
+		subaccount.LockDeposit = exchange.ToFloat64(vv["lock_deposit"])
+		subaccount.Balance = exchange.ToFloat64(vv["balance"])
+	}
+
+	return subaccount, nil
 }
 
 func (fc *FCoin) GetKlineRecords(currency exchange.CurrencyPair, period, size, since int) ([]exchange.Kline, error) {

@@ -46,7 +46,7 @@ func TestFCoin_LimitSell(t *testing.T) {
 }
 
 func TestFCoin_GetOneOrder(t *testing.T) {
-	t.Log(ft.GetOneOrder("KRcowt_w79qxcBdooYb-RxtZ_67TFcme7eUXU8bMusg=", exchange.ETC_USDT))
+	t.Log(ft.GetOrder("KRcowt_w79qxcBdooYb-RxtZ_67TFcme7eUXU8bMusg=", exchange.ETC_USDT))
 }
 
 func TestFCoin_CancelOrder(t *testing.T) {

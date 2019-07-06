@@ -2,7 +2,6 @@ package exchange
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"reflect"
 	"time"
@@ -100,48 +99,6 @@ func CancelAllUnfinishedOrders(api API, currencyPair CurrencyPair) int {
 				c++
 			}
 			time.Sleep(120 * time.Millisecond) //控制频率
-		}
-	}
-
-	return c
-}
-
-/**
- * call all unfinished future orders
- * @return c 成功撤单数量
- */
-func CancelAllUnfinishedFutureOrders(api FutureRestAPI, contractType string, currencyPair CurrencyPair) int {
-	if api == nil {
-		log.Println("api instance is nil ??? , please new a api instance")
-		return 0
-	}
-
-	c := 0
-
-	for {
-		ret := RE(10, 200*time.Millisecond, api.GetUnfinishFutureOrders, currencyPair, contractType)
-		if err, isok := ret.(error); !isok {
-			log.Println("[api error]", err)
-			break
-		}
-
-		if ret == nil {
-			break
-		}
-
-		orders, isok := ret.([]Order)
-		if !isok || len(orders) == 0 {
-			break
-		}
-
-		for _, ord := range orders {
-			_, err := api.FutureCancelOrder(currencyPair, contractType, fmt.Sprintf("%d", ord.OrderID))
-			if err != nil {
-				log.Println(err)
-			} else {
-				c++
-			}
-			time.Sleep(100 * time.Millisecond) //控制频率
 		}
 	}
 
