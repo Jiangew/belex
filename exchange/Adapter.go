@@ -9,10 +9,6 @@ func AdaptTradeSide(side string) TradeSide {
 		return SELL
 	case "BUY":
 		return BUY
-	case "BUY_MARKET":
-		return BUY_MARKET
-	case "SELL_MARKET":
-		return SELL_MARKET
 	default:
 		return -1
 	}

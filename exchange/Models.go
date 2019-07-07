@@ -7,15 +7,14 @@ import (
 
 type NewOrder struct {
 	ID            string
-	Symbol        CurrencyPair
-	Side          TradeSide
-	OrderType     OrderType
+	Symbol        string
+	Side          string
+	OrderType     string
 	Price         float64
 	Amount        float64
-	Status        TradeStatus
-	ExecutedValue string
+	State         string
 	FilledAmount  float64
-	Fee           float64
+	FillFee       float64
 	Source        string
 	CreatedAt     uint64
 }
@@ -30,22 +29,22 @@ type Order struct {
 	OrderID2   string
 	OrderID    int //deprecated
 	OrderTime  int
-	Status     TradeStatus
-	Currency   CurrencyPair
+	Status     OrderState
+	Symbol     Symbol
 	Side       TradeSide
 }
 
 type Trade struct {
-	Tid    int64        `json:"tid"`
-	Type   TradeSide    `json:"type"`
-	Amount float64      `json:"amount,string"`
-	Price  float64      `json:"price,string"`
-	Date   int64        `json:"date_ms"`
-	Pair   CurrencyPair `json:"omitempty"`
+	Tid    int64     `json:"tid"`
+	Type   TradeSide `json:"type"`
+	Amount float64   `json:"amount,string"`
+	Price  float64   `json:"price,string"`
+	Date   int64     `json:"date_ms"`
+	Symbol Symbol    `json:"omitempty"`
 }
 
 type SubAccount struct {
-	Currency      Currency
+	Currency      string
 	Available     float64
 	Frozen        float64
 	DemandDeposit float64
@@ -61,17 +60,17 @@ type Account struct {
 }
 
 type Ticker struct {
-	Pair    CurrencyPair `json:"omitempty"`
-	Date    uint64       `json:"date"` //ms
-	Last    float64      `json:"last,string"`
-	LastVol float64      `json:"last_vol,string"`
-	Buy     float64      `json:"buy,string"`
-	BuyVol  float64      `json:"buy_vol,string"`
-	Sell    float64      `json:"sell,string"`
-	SellVol float64      `json:"sell_vol,string"`
-	High    float64      `json:"high,string"`
-	Low     float64      `json:"low,string"`
-	Vol     float64      `json:"vol,string"`
+	Symbol  string  `json:"symbol"`
+	Date    uint64  `json:"date"`
+	Last    float64 `json:"last,string"`
+	LastVol float64 `json:"last_vol,string"`
+	Buy     float64 `json:"buy,string"`
+	BuyVol  float64 `json:"buy_vol,string"`
+	Sell    float64 `json:"sell,string"`
+	SellVol float64 `json:"sell_vol,string"`
+	High    float64 `json:"high,string"`
+	Low     float64 `json:"low,string"`
+	Vol     float64 `json:"vol,string"`
 }
 
 type DepthRecord struct {
@@ -94,8 +93,7 @@ func (dr DepthRecords) Less(i, j int) bool {
 }
 
 type Depth struct {
-	ContractType string //for future
-	Pair         CurrencyPair
+	Symbol       string
 	UTime        time.Time
 	AskList      DepthRecords //Descending order
 	BidList      DepthRecords //Descending order
@@ -113,7 +111,7 @@ type APIConfig struct {
 }
 
 type Kline struct {
-	Pair      CurrencyPair
+	Symbol    Symbol
 	Timestamp int64
 	Open      float64
 	Close     float64
@@ -148,8 +146,8 @@ type FutureOrder struct {
 	DealAmount   float64
 	OrderID      int64 //deprecated
 	OrderTime    int64
-	Status       TradeStatus
-	Currency     CurrencyPair
+	Status       OrderState
+	Currency     Symbol
 	OType        int     //1：开多 2：开空 3：平多 4： 平空
 	LeverRate    int     //倍数
 	Fee          float64 //手续费
@@ -169,7 +167,7 @@ type FuturePosition struct {
 	SellPriceAvg   float64
 	SellPriceCost  float64
 	SellProfitReal float64
-	Symbol         CurrencyPair //btc_usd:比特币,ltc_usd:莱特币
+	Symbol         Symbol //btc_usd:比特币,ltc_usd:莱特币
 	ContractType   string
 	ContractId     int64
 	ForceLiquPrice float64 //预估爆仓价

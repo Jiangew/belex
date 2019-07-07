@@ -90,6 +90,7 @@ func NewFCoinWs(client *http.Client) *FCoinWs {
 	if len(fcWs.tradeSymbols) == 0 {
 		panic("trade symbol is empty, pls check connection...")
 	}
+
 	return fcWs
 }
 
@@ -102,6 +103,7 @@ func getRandomString(length int) string {
 	for i := 0; i < length; i++ {
 		result = append(result, bytes[r.Intn(len(bytes))])
 	}
+
 	return string(result)
 }
 
@@ -122,11 +124,11 @@ func (fcWs *FCoinWs) subscribe(sub map[string]interface{}) error {
 	return fcWs.wsConn.Subscribe(sub)
 }
 
-func (fcWs *FCoinWs) SubscribeDepth(pair exchange.CurrencyPair, size int) error {
+func (fcWs *FCoinWs) SubscribeDepth(symbol exchange.Symbol, size int) error {
 	if fcWs.depthCallback == nil {
 		return errors.New("please set depth callback func")
 	}
-	arg := fmt.Sprintf(FCoinWSOrderBook, size, strings.ToLower(pair.ToSymbol("")))
+	arg := fmt.Sprintf(FCoinWSOrderBook, size, strings.ToLower(symbol.ToSymbol("")))
 	args := make([]interface{}, 0)
 	args = append(args, arg)
 
@@ -136,11 +138,11 @@ func (fcWs *FCoinWs) SubscribeDepth(pair exchange.CurrencyPair, size int) error 
 		"args": args})
 }
 
-func (fcWs *FCoinWs) SubscribeTicker(pair exchange.CurrencyPair) error {
+func (fcWs *FCoinWs) SubscribeTicker(symbol exchange.Symbol) error {
 	if fcWs.tickerCallback == nil {
 		return errors.New("please set ticker callback func")
 	}
-	arg := fmt.Sprintf(FCoinWSTicker, strings.ToLower(pair.ToSymbol("")))
+	arg := fmt.Sprintf(FCoinWSTicker, strings.ToLower(symbol.ToSymbol("")))
 	args := make([]interface{}, 0)
 	args = append(args, arg)
 
@@ -150,11 +152,11 @@ func (fcWs *FCoinWs) SubscribeTicker(pair exchange.CurrencyPair) error {
 		"args": args})
 }
 
-func (fcWs *FCoinWs) SubscribeTrade(pair exchange.CurrencyPair) error {
+func (fcWs *FCoinWs) SubscribeTrade(symbol exchange.Symbol) error {
 	if fcWs.tradeCallback == nil {
 		return errors.New("please set trade callback func")
 	}
-	arg := fmt.Sprintf(FCoinWSTrades, strings.ToLower(pair.ToSymbol("")))
+	arg := fmt.Sprintf(FCoinWSTrades, strings.ToLower(symbol.ToSymbol("")))
 	args := make([]interface{}, 0)
 	args = append(args, arg)
 
@@ -164,7 +166,7 @@ func (fcWs *FCoinWs) SubscribeTrade(pair exchange.CurrencyPair) error {
 		"args": args})
 }
 
-func (fcWs *FCoinWs) SubscribeKline(pair exchange.CurrencyPair, period int) error {
+func (fcWs *FCoinWs) SubscribeKline(symbol exchange.Symbol, period int) error {
 	if fcWs.klineCallback == nil {
 		return errors.New("place set kline callback func")
 	}
@@ -173,7 +175,7 @@ func (fcWs *FCoinWs) SubscribeKline(pair exchange.CurrencyPair, period int) erro
 		periodS = "M1"
 	}
 
-	arg := fmt.Sprintf(FCoinWSKLines, periodS, strings.ToLower(pair.ToSymbol("")))
+	arg := fmt.Sprintf(FCoinWSKLines, periodS, strings.ToLower(symbol.ToSymbol("")))
 	args := make([]interface{}, 0)
 	args = append(args, arg)
 
@@ -257,22 +259,22 @@ func (fcWs *FCoinWs) handle(msg []byte) error {
 			fcWs.timeoffset = int64(offset)
 		case "ticker":
 			tick := fcWs.parseTickerData(datamap["ticker"].([]interface{}))
-			pair, err := fcWs.getPairFromType(resp[1])
+			symbol, err := fcWs.getSymbolFromType(resp[1])
 			if err != nil {
 				panic(err)
 			}
-			tick.Pair = pair
+			tick.Symbol = symbol.ToSymbol("/")
 			fcWs.tickerCallback(tick)
 			return nil
 		case "depth":
 			dep := fcWs.parseDepthData(datamap["bids"].([]interface{}), datamap["asks"].([]interface{}))
 			stime := int64(exchange.ToInt(datamap["ts"]))
 			dep.UTime = time.Unix(stime/1000, 0)
-			pair, err := fcWs.getPairFromType(resp[2])
+			symbol, err := fcWs.getSymbolFromType(resp[2])
 			if err != nil {
 				panic(err)
 			}
-			dep.Pair = pair
+			dep.Symbol = symbol.ToSymbol("/")
 
 			fcWs.depthCallback(dep)
 			return nil
@@ -286,11 +288,11 @@ func (fcWs *FCoinWs) handle(msg []byte) error {
 				Low:       exchange.ToFloat64(datamap["low"]),
 				Vol:       exchange.ToFloat64(datamap["quote_vol"]),
 			}
-			pair, err := fcWs.getPairFromType(resp[2])
+			symbol, err := fcWs.getSymbolFromType(resp[2])
 			if err != nil {
 				panic(err)
 			}
-			kline.Pair = pair
+			kline.Symbol = symbol
 			fcWs.klineCallback(kline, period)
 			return nil
 		case "trade":
@@ -305,26 +307,27 @@ func (fcWs *FCoinWs) handle(msg []byte) error {
 				Price:  exchange.ToFloat64(datamap["price"]),
 				Date:   int64(exchange.ToUint64(datamap["ts"])),
 			}
-			pair, err := fcWs.getPairFromType(resp[1])
+			symbol, err := fcWs.getSymbolFromType(resp[1])
 			if err != nil {
 				panic(err)
 			}
-			trade.Pair = pair
+			trade.Symbol = symbol
 			fcWs.tradeCallback(trade)
 			return nil
 		default:
 			return errors.New("unknown message " + msgType)
-
 		}
 	}
+
 	return nil
 }
 
-func (fcWs *FCoinWs) getPairFromType(pair string) (exchange.CurrencyPair, error) {
+func (fcWs *FCoinWs) getSymbolFromType(symbol string) (exchange.Symbol, error) {
 	for _, v := range fcWs.tradeSymbols {
-		if v.Name == pair {
-			return exchange.NewCurrencyPair2(v.BaseCurrency + "_" + v.QuoteCurrency), nil
+		if v.Name == symbol {
+			return exchange.NewSymbol2(v.BaseCurrency + "_" + v.QuoteCurrency), nil
 		}
 	}
-	return exchange.NewCurrencyPair2("" + "_" + ""), errors.New("pair not support :" + pair)
+
+	return exchange.NewSymbol2("" + "_" + ""), errors.New("symbol not support :" + symbol)
 }

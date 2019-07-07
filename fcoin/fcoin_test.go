@@ -23,7 +23,7 @@ var ft = NewFCoin(&http.Client{
 }, "", "")
 
 func TestFCoin_GetTicker(t *testing.T) {
-	t.Log(ft.GetTicker(exchange.NewCurrencyPair2("BTC_USDT")))
+	t.Log(ft.GetTicker(exchange.NewSymbol2("BTC_USDT")))
 }
 
 func TestFCoin_GetDepth(t *testing.T) {
@@ -54,7 +54,7 @@ func TestFCoin_CancelOrder(t *testing.T) {
 }
 
 func TestFCoin_GetUnfinishOrders(t *testing.T) {
-	t.Log(ft.GetUnfinishOrders(exchange.ETC_USDT))
+	t.Log(ft.GetActiveOrders(exchange.ETC_USDT))
 }
 
 func TestFCoin_GetOrderHistorys(t *testing.T) {

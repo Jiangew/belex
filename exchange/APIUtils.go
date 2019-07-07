@@ -66,7 +66,7 @@ _CALL:
 /**
  * call all unfinished orders
  */
-func CancelAllUnfinishedOrders(api API, currencyPair CurrencyPair) int {
+func CancelAllUnfinishedOrders(api API, symbol Symbol) int {
 	if api == nil {
 		log.Println("api instance is nil ??? , please new a api instance")
 		return -1
@@ -75,7 +75,7 @@ func CancelAllUnfinishedOrders(api API, currencyPair CurrencyPair) int {
 	c := 0
 
 	for {
-		ret := RE(2, 200*time.Millisecond, api.GetUnfinishOrders, currencyPair)
+		ret := RE(2, 200*time.Millisecond, api.GetActiveOrders, symbol)
 
 		if err, isok := ret.(error); !isok {
 			log.Println("[api error]", err)
@@ -92,7 +92,7 @@ func CancelAllUnfinishedOrders(api API, currencyPair CurrencyPair) int {
 		}
 
 		for _, ord := range orders {
-			_, err := api.CancelOrder(ord.OrderID2, currencyPair)
+			_, err := api.CancelOrder(ord.OrderID2, symbol)
 			if err != nil {
 				log.Println(err)
 			} else {

@@ -38,6 +38,12 @@
   version = "v1.0.0"
 
 [[projects]]
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  revision = "418b41d23a1bf978c06faea5313ba194650ac088"
+  version = "v0.8.7"
+
+[[projects]]
   name = "github.com/stretchr/testify"
   packages = ["assert"]
   revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
@@ -46,6 +52,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "23be117410e7193ceae5f98f675b6e29a5e53616610ee52b0c917fe299ef469e"
+  inputs-digest = "d42fdd4bf961aee2039b34257fff6c8b57a0d07698b271ed439fe4fd2d7fa37d"
   solver-name = "gps-cdcl"
   solver-version = 1
