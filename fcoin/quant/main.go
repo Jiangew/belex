@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/jiangew/belex/builder"
 	"github.com/jiangew/belex/exchange"
+	"log"
 	"time"
 )
 
@@ -14,37 +14,37 @@ func main() {
 
 	usdtAccount, _ := api.GetSubAccount(exchange.USDT)
 	ret, _ := json.Marshal(usdtAccount)
-	fmt.Println(string(ret))
+	log.Println(string(ret))
 
 	ftAccount, _ := api.GetSubAccount(exchange.FT)
 	ret, _ = json.Marshal(ftAccount)
-	fmt.Println(string(ret))
+	log.Println(string(ret))
 
 	fmexAccount, _ := api.GetSubAccount(exchange.FMEX)
 	ret, _ = json.Marshal(fmexAccount)
-	fmt.Println(string(ret))
+	log.Println(string(ret))
 
 	ftTicker, _ := api.GetTicker(exchange.FT_USDT)
 	ret, _ = json.Marshal(ftTicker)
-	fmt.Println(string(ret))
+	log.Println(string(ret))
 
 	ftDepth, _ := api.GetDepth(2, exchange.FT_USDT)
 	ret, _ = json.Marshal(ftDepth)
-	fmt.Println(string(ret))
+	log.Println(string(ret))
 
 	fmexTicker, _ := api.GetTicker(exchange.FMEX_USDT)
 	ret, _ = json.Marshal(fmexTicker)
-	fmt.Println(string(ret))
+	log.Println(string(ret))
 
 	fmexDepth, _ := api.GetDepth(2, exchange.FMEX_USDT)
 	ret, _ = json.Marshal(fmexDepth)
-	fmt.Println(string(ret))
+	log.Println(string(ret))
 
 	ftActiveOrders, _ := api.GetActiveOrders(exchange.FT_USDT)
 	ret, _ = json.Marshal(ftActiveOrders)
-	fmt.Println(string(ret))
+	log.Println(string(ret))
 
 	fmexActiveOrders, _ := api.GetActiveOrders(exchange.FMEX_USDT)
 	ret, _ = json.Marshal(fmexActiveOrders)
-	fmt.Println(string(ret))
+	log.Println(string(ret))
 }
