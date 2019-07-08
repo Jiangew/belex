@@ -38,19 +38,19 @@ func TestFCoin_GetAccount(t *testing.T) {
 }
 
 func TestFCoin_LimitBuy(t *testing.T) {
-	t.Log(ft.LimitBuy("0.01", "100", exchange.ETC_USD))
+	t.Log(ft.LimitBuy("0.01", "100", exchange.FT_USDT))
 }
 
 func TestFCoin_LimitSell(t *testing.T) {
-	t.Log(ft.LimitSell("0.01", "50", exchange.ETC_USD))
+	t.Log(ft.LimitSell("0.01", "50", exchange.FT_USDT))
 }
 
 func TestFCoin_GetOneOrder(t *testing.T) {
-	t.Log(ft.GetOrder("KRcowt_w79qxcBdooYb-RxtZ_67TFcme7eUXU8bMusg=", exchange.ETC_USDT))
+	t.Log(ft.GetOrder("KRcowt_w79qxcBdooYb-RxtZ_67TFcme7eUXU8bMusg=", exchange.FT_USDT))
 }
 
 func TestFCoin_CancelOrder(t *testing.T) {
-	t.Log(ft.CancelOrder("-MR0CItwW-rpSFJau7bfCyUBrw9nrkLNipV9odvPlRQ=", exchange.ETC_USDT))
+	t.Log(ft.CancelOrder("-MR0CItwW-rpSFJau7bfCyUBrw9nrkLNipV9odvPlRQ=", exchange.FT_USDT))
 }
 
 func TestFCoin_GetUnfinishOrders(t *testing.T) {

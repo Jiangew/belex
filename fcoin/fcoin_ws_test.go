@@ -43,21 +43,21 @@ func printfKline(kline *exchange.Kline, period int) {
 
 func TestFCoinWs_GetTickerWithWs(t *testing.T) {
 	return
-	fcws.SubscribeTicker(exchange.BTC_USDT)
+	fcws.SubscribeTicker(exchange.FT_USDT)
 	time.Sleep(time.Second * 10)
 }
 func TestFCoinWs_GetDepthWithWs(t *testing.T) {
 	return
-	fcws.SubscribeDepth(exchange.BTC_USDT, 20)
+	fcws.SubscribeDepth(exchange.FT_USDT, 20)
 	time.Sleep(time.Second * 10)
 }
 func TestFCoinWs_GetKLineWithWs(t *testing.T) {
 	//return
-	fcws.SubscribeKline(exchange.BTC_USDT, exchange.KLINE_PERIOD_1MIN)
+	fcws.SubscribeKline(exchange.FT_USDT, exchange.KLINE_PERIOD_1MIN)
 	time.Sleep(time.Second * 120)
 }
 func TestFCoinWs_GetTradesWithWs(t *testing.T) {
 	return
-	fcws.SubscribeTrade(exchange.BTC_USDT)
+	fcws.SubscribeTrade(exchange.FT_USDT)
 	time.Sleep(time.Second * 10)
 }

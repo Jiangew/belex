@@ -24,52 +24,31 @@ var (
 	UNKNOWN = Currency{"UNKNOWN", ""}
 
 	USDT = Currency{"USDT", ""}
-	USD  = Currency{"USD", ""}
-	PAX  = Currency{"PAX", "https://www.paxos.com"}
-
-	BTC  = Currency{"BTC", "https://bitcoin.org"}
+	PAX  = Currency{"PAX", ""}
+	TUSD = Currency{"TUSD", ""}
+	BTC  = Currency{"BTC", ""}
 	BCH  = Currency{"BCH", ""}
 	BSV  = Currency{"BSV", ""}
-	LTC  = Currency{"LTC", ""}
 	ETH  = Currency{"ETH", ""}
 	ETC  = Currency{"ETC", ""}
+	LTC  = Currency{"LTC", ""}
 	EOS  = Currency{"EOS", ""}
 	XRP  = Currency{"XRP", ""}
 	FT   = Currency{"FT", "FCoin Token"}
-	FMEX = Currency{"FMEX", "FCoin Future Token"}
+	FMEX = Currency{"FMEX", "FCoin Contract Token"}
 
-	BTC_USD = Symbol{BTC, USD}
-	LTC_USD = Symbol{LTC, USD}
-	ETH_USD = Symbol{ETH, USD}
-	ETC_USD = Symbol{ETC, USD}
-	BCH_USD = Symbol{BCH, USD}
-	BSV_USD = Symbol{BSV, USD}
-	XRP_USD = Symbol{XRP, USD}
-	EOS_USD = Symbol{EOS, USD}
-
+	PAX_USDT  = Symbol{PAX, USDT}
+	TUSD_USDT = Symbol{TUSD, USDT}
 	BTC_USDT  = Symbol{BTC, USDT}
-	LTC_USDT  = Symbol{LTC, USDT}
 	BCH_USDT  = Symbol{BCH, USDT}
 	BSV_USDT  = Symbol{BSV, USDT}
 	ETH_USDT  = Symbol{ETH, USDT}
 	ETC_USDT  = Symbol{ETC, USDT}
+	LTC_USDT  = Symbol{LTC, USDT}
 	EOS_USDT  = Symbol{EOS, USDT}
 	XRP_USDT  = Symbol{XRP, USDT}
 	FT_USDT   = Symbol{FT, USDT}
 	FMEX_USDT = Symbol{FMEX, USDT}
-
-	LTC_BTC = Symbol{LTC, BTC}
-	ETH_BTC = Symbol{ETH, BTC}
-	ETC_BTC = Symbol{ETC, BTC}
-	BCH_BTC = Symbol{BCH, BTC}
-	BSV_BTC = Symbol{BSV, BTC}
-	XRP_BTC = Symbol{XRP, BTC}
-	EOS_BTC = Symbol{EOS, BTC}
-	FT_BTC  = Symbol{FT, BTC}
-
-	ETC_ETH = Symbol{ETC, ETH}
-	LTC_ETH = Symbol{LTC, ETH}
-	EOS_ETH = Symbol{EOS, ETH}
 
 	UNKNOWN_SYMBOL = Symbol{UNKNOWN, UNKNOWN}
 )
@@ -88,14 +67,24 @@ func NewCurrency(name, desc string) Currency {
 		return USDT
 	case "pax", "PAX":
 		return PAX
+	case "tusd", "TUSD":
+		return TUSD
 	case "btc", "BTC":
 		return BTC
 	case "bch", "BCH":
 		return BCH
+	case "bsv", "BSV":
+		return BSV
+	case "eth", "ETH":
+		return ETH
+	case "etc", "ETC":
+		return ETC
 	case "ltc", "LTC":
 		return LTC
 	case "eos", "EOS":
 		return EOS
+	case "xrp", "XRP":
+		return XRP
 	case "ft", "FT":
 		return FT
 	case "fmex", "FMEX":
@@ -127,22 +116,6 @@ func (symbol Symbol) ToSymbol(joinChar string) string {
 
 func (symbol Symbol) ToSymbol2(joinChar string) string {
 	return strings.Join([]string{symbol.QuoteCurrency.Name, symbol.BaseCurrency.Name}, joinChar)
-}
-
-func (symbol Symbol) AdaptUsdtToUsd() Symbol {
-	quoteCurrency := symbol.QuoteCurrency
-	if symbol.QuoteCurrency.Eq(USDT) {
-		quoteCurrency = USD
-	}
-	return Symbol{symbol.BaseCurrency, quoteCurrency}
-}
-
-func (symbol Symbol) AdaptUsdToUsdt() Symbol {
-	quoteCurrency := symbol.QuoteCurrency
-	if symbol.QuoteCurrency.Eq(USD) {
-		quoteCurrency = USDT
-	}
-	return Symbol{symbol.BaseCurrency, quoteCurrency}
 }
 
 //for to symbol lower, Not practical '==' operation method

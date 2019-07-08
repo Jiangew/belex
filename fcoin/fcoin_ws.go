@@ -94,7 +94,6 @@ func NewFCoinWs(client *http.Client) *FCoinWs {
 	return fcWs
 }
 
-//生成随机字符串
 func getRandomString(length int) string {
 	str := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	bytes := []byte(str)
@@ -238,7 +237,6 @@ func (fcWs *FCoinWs) parseKlineData(tickmap []interface{}) *exchange.Ticker {
 }
 
 func (fcWs *FCoinWs) handle(msg []byte) error {
-	//fmt.Println("ws msg:", string(msg))
 	datamap := make(map[string]interface{})
 	err := json.Unmarshal(msg, &datamap)
 	if err != nil {

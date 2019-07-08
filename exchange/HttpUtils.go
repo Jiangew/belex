@@ -1,6 +1,5 @@
 package exchange
 
-//http request 工具函数
 import (
 	"encoding/json"
 	"errors"
