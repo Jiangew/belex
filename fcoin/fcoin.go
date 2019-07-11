@@ -262,13 +262,13 @@ func (fc *FCoin) placeOrder(orderType, orderSide, amount, price string, symbol e
 	//}
 
 	return &exchange.NewOrder{
-		ID:           r.(string),
-		Symbol:       symbol.ToSymbol("/"),
-		Side:         orderSide,
-		OrderType:    orderType,
-		Price:        exchange.ToFloat64(price),
-		Amount:       exchange.ToFloat64(amount),
-		State:        "SUBMITTED",
+		ID:        r.(string),
+		Symbol:    symbol.ToSymbol("/"),
+		Side:      orderSide,
+		OrderType: orderType,
+		Price:     exchange.ToFloat64(price),
+		Amount:    exchange.ToFloat64(amount),
+		State:     "SUBMITTED",
 	}, nil
 }
 
@@ -529,12 +529,10 @@ func (fc *FCoin) GetKlineRecords(symbol exchange.Symbol, period, size, since int
 	panic("not implement")
 }
 
-//非个人，整个交易所的交易记录
 func (fc *FCoin) GetTrades(symbol exchange.Symbol, since int64) ([]exchange.Trade, error) {
 	panic("not implement")
 }
 
-//交易符号
 func (fc *FCoin) getTradeSymbols() ([]TradeSymbol, error) {
 	respmap, err := exchange.HttpGet(fc.httpClient, fc.baseUrl+"public/symbols")
 	if err != nil {
@@ -557,6 +555,7 @@ func (fc *FCoin) getTradeSymbols() ([]TradeSymbol, error) {
 		symbol.PriceDecimal = int(vv["price_decimal"].(float64))
 		symbol.AmountDecimal = int(vv["amount_decimal"].(float64))
 		symbol.Tradable = vv["tradable"].(bool)
+
 		if symbol.Tradable {
 			tradeSymbols = append(tradeSymbols, symbol)
 		}
