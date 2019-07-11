@@ -11,19 +11,19 @@ import (
 )
 
 func printfTicker(ticker *exchange.Ticker) {
-	fmt.Println(ticker)
+	fmt.Println("ticker:", ticker)
 }
 
 func printfDepth(depth *exchange.Depth) {
-	fmt.Println(depth)
+	fmt.Println("depth:", depth)
 }
 
 func printfTrade(trade *exchange.Trade) {
-	fmt.Println(trade)
+	fmt.Println("trade:", trade)
 }
 
 func printfKline(kline *exchange.Kline, period int) {
-	fmt.Println(kline)
+	fmt.Println("kline:", kline)
 }
 
 func main() {
@@ -47,4 +47,6 @@ func main() {
 	fcws.SubscribeDepth(exchange.FMEX_USDT, 2)
 	fcws.SubscribeKline(exchange.FMEX_USDT, exchange.KLINE_PERIOD_1MIN)
 	fcws.SubscribeTrade(exchange.FMEX_USDT)
+
+	time.Sleep(60 * time.Second)
 }
