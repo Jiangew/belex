@@ -70,6 +70,7 @@ var _INERNAL_KLINE_PERIOD_REVERTER = map[string]int{
 func NewFCoinWs(client *http.Client, apikey, secretkey string) *FCoinWs {
 	fcWs := &FCoinWs{}
 	fcWs.clientId = getRandomString(8)
+
 	fcWs.WsBuilder = exchange.NewWsBuilder().
 		WsUrl("wss://api.fcoin.com/v2/ws").
 		Heartbeat2(func() interface{} {
@@ -85,7 +86,9 @@ func NewFCoinWs(client *http.Client, apikey, secretkey string) *FCoinWs {
 		ReconnectIntervalTime(24 * time.Hour).
 		UnCompressFunc(exchange.FlateUnCompress).
 		ProtoHandleFunc(fcWs.handle)
+
 	fc := NewFCoin(client, apikey, secretkey)
+
 	fcWs.tradeSymbols = fc.tradeSymbols
 
 	if len(fcWs.tradeSymbols) == 0 {
