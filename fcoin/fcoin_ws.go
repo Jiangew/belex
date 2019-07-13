@@ -131,7 +131,7 @@ func (fcWs *FCoinWs) SubscribeDepth(symbol exchange.Symbol, size int) error {
 	if fcWs.depthCallback == nil {
 		return errors.New("please set depth callback func")
 	}
-	arg := fmt.Sprintf(FCoinWSOrderBook, size, strings.ToLower(symbol.ToSymbol("")))
+	arg := fmt.Sprintf(FCoinWSOrderBookL20, strings.ToLower(symbol.ToSymbol("")))
 	args := make([]interface{}, 0)
 	args = append(args, arg)
 
