@@ -26,8 +26,8 @@ func printfKline(kline *exchange.Kline, period int) {
 }
 
 func main() {
-	//apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second).HttpProxy("socks5://127.0.0.1:1086")
-	apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second)
+	apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second).HttpProxy("socks5://127.0.0.1:1086")
+	//apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second)
 	api := apiBuilder.APIKey("1412ac27e3f741c796f7c4600069d9f1").APISecretkey("4843754749be46919d986142917f06d7").Build(exchange.FCOIN)
 	buyPrice := float64(0)
 	sellPrice := float64(0)
@@ -47,56 +47,70 @@ func main() {
 			}
 		}
 
-		usdtAccount, _ := api.GetSubAccount(exchange.USDT)
-		paxAccount, _ := api.GetSubAccount(exchange.PAX)
-
-		//paxTicker, _ := api.GetTicker(exchange.PAX_USDT)
-		//ret, _ = json.Marshal(paxTicker)
-		//log.Println(string(ret))
-
 		depths, _ := api.GetDepth(2, exchange.PAX_USDT)
 		buyDepth := depths.BidList[0]
 		sellDepth := depths.AskList[0]
-		log.Println("buyDepth:", buyDepth)
-		log.Println("sellDepth:", sellDepth)
+		log.Println("depth buy:", buyDepth)
+		log.Println("depth sell:", sellDepth)
+
+		usdtAccount, err := api.GetSubAccount(exchange.USDT)
+		if err != nil {
+			log.Println("usdt account err:", err)
+		}
 
 		if buyDepth.Price-buyPrice != 0 {
 			if buyID != "" {
-				cancel, _ := api.CancelOrder(buyID, exchange.PAX_USDT)
-				log.Println("id:", buyID, "cancel:", cancel)
+				cancel, err := api.CancelOrder(buyID, exchange.PAX_USDT)
+				if err != nil {
+					log.Println("id:", buyID, "cancel err:", err)
+				} else if cancel == true {
+					log.Println("id:", buyID, "cancel:", cancel)
+					buyID = ""
+				}
 			}
 
 			if usdtAccount.Available > 0 {
 				buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", math.Floor(usdtAccount.Available/buyDepth.Price)), fmt.Sprintf("%.4f", buyDepth.Price), exchange.PAX_USDT)
 				if err != nil {
-					log.Println(err)
+					log.Println("limit buy err:", err)
 				} else {
 					buyPrice = buyDepth.Price
 					buyID = buyOrder.ID
-					log.Println("buyOrderID:", buyOrder.ID)
+					log.Println("order buy:", buyOrder.ID)
 				}
 			}
 		}
 
+		paxAccount, err := api.GetSubAccount(exchange.PAX)
+		if err != nil {
+			log.Println("pax account err:", err)
+		}
+
 		if sellDepth.Price-sellPrice != 0 {
 			if sellID != "" {
-				cancel, _ := api.CancelOrder(sellID, exchange.PAX_USDT)
-				log.Println("id:", sellID, "cancel:", cancel)
+				cancel, err := api.CancelOrder(sellID, exchange.PAX_USDT)
+				if err != nil {
+					log.Println("id:", sellID, "cancel err:", err)
+				} else if cancel == true {
+					log.Println("id:", sellID, "cancel:", cancel)
+					sellID = ""
+				}
 			}
 
 			if paxAccount.Available > 0 {
 				sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", math.Floor(paxAccount.Available/sellDepth.Price)), fmt.Sprintf("%.4f", sellDepth.Price), exchange.PAX_USDT)
 				if err != nil {
-					log.Println(err)
+					log.Println("limit sell err:", err)
 				} else {
 					sellPrice = sellDepth.Price
 					sellID = sellOrder.ID
-					log.Println("sellOrderID:", sellOrder.ID)
+					log.Println("order sell:", sellOrder.ID)
 				}
 			}
 		}
 
 		count++
+		time.Sleep(1 * time.Second)
 	}
 }
 
