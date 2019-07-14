@@ -70,13 +70,16 @@ func main() {
 			}
 
 			if usdtAccount.Available > 0 {
-				buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", math.Floor(usdtAccount.Available/buyDepth.Price)), fmt.Sprintf("%.4f", buyDepth.Price), exchange.PAX_USDT)
-				if err != nil {
-					log.Println("limit buy err:", err)
-				} else {
-					buyPrice = buyDepth.Price
-					buyID = buyOrder.ID
-					log.Println("order buy:", buyOrder.ID)
+				amount := math.Floor(usdtAccount.Available / buyDepth.Price)
+				if amount > 1 {
+					buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", buyDepth.Price), exchange.PAX_USDT)
+					if err != nil {
+						log.Println("limit buy err:", err)
+					} else {
+						buyPrice = buyDepth.Price
+						buyID = buyOrder.ID
+						log.Println("order buy:", buyOrder.ID)
+					}
 				}
 			}
 		}
@@ -98,13 +101,16 @@ func main() {
 			}
 
 			if paxAccount.Available > 0 {
-				sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", math.Floor(paxAccount.Available/sellDepth.Price)), fmt.Sprintf("%.4f", sellDepth.Price), exchange.PAX_USDT)
-				if err != nil {
-					log.Println("limit sell err:", err)
-				} else {
-					sellPrice = sellDepth.Price
-					sellID = sellOrder.ID
-					log.Println("order sell:", sellOrder.ID)
+				amount := math.Floor(paxAccount.Available / sellDepth.Price)
+				if amount > 1 {
+					sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", ), fmt.Sprintf("%.4f", sellDepth.Price), exchange.PAX_USDT)
+					if err != nil {
+						log.Println("limit sell err:", err)
+					} else {
+						sellPrice = sellDepth.Price
+						sellID = sellOrder.ID
+						log.Println("order sell:", sellOrder.ID)
+					}
 				}
 			}
 		}
