@@ -55,11 +55,7 @@ func main() {
 				amount := (usdtAccount.Available - 1) / buyDepth.Price
 				if amount > 1 {
 					buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", buyDepth.Price), exchange.PAX_USDT)
-					if err != nil {
-						log.Println("limit buy amount:", amount, "price:", buyDepth.Price, "err:", err)
-					} else {
-						log.Println("limit buy success:", buyOrder.ID)
-					}
+					log.Println("limit buy amount:", amount, "price:", buyDepth.Price, "success:", buyOrder.ID, "err:", err)
 				}
 			}
 		}
@@ -72,11 +68,7 @@ func main() {
 				amount := paxAccount.Available - 1
 				if amount > 1 {
 					sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", sellDepth.Price), exchange.PAX_USDT)
-					if err != nil {
-						log.Println("limit sell amount:", amount, "price:", buyDepth.Price, "err:", err)
-					} else {
-						log.Println("limit sell success:", sellOrder.ID)
-					}
+					log.Println("limit sell amount:", amount, "price:", buyDepth.Price, "success:", sellOrder.ID, "err:", err)
 				}
 			}
 		}
