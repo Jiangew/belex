@@ -9,8 +9,8 @@ import (
 )
 
 func main() {
-	//apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second).HttpProxy("socks5://127.0.0.1:1086")
-	apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second)
+	apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second).HttpProxy("socks5://127.0.0.1:1086")
+	//apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second)
 	api := apiBuilder.APIKey("1412ac27e3f741c796f7c4600069d9f1").APISecretkey("4843754749be46919d986142917f06d7").Build(exchange.FCOIN)
 	count := 0
 	for {
@@ -19,7 +19,7 @@ func main() {
 			if len(orders) > 0 {
 				for _, order := range orders {
 					cancel, _ := api.CancelOrder(order.ID, exchange.PAX_USDT)
-					log.Println("id:", order.ID, "cancel:", cancel)
+					log.Println("cancel order:", order.ID, "ret:", cancel)
 				}
 			}
 		}
@@ -36,12 +36,12 @@ func main() {
 				if order.Side == "buy" {
 					if order.Price != buyDepth.Price {
 						cancel, _ := api.CancelOrder(order.ID, exchange.PAX_USDT)
-						log.Println("buyid:", order.ID, "cancel:", cancel)
+						log.Println("cancel buy:", order.ID, "ret:", cancel)
 					}
 				} else if order.Side == "sell" {
 					if order.Price != sellDepth.Price {
 						cancel, _ := api.CancelOrder(order.ID, exchange.PAX_USDT)
-						log.Println("sellid:", order.ID, "cancel:", cancel)
+						log.Println("cancel sell:", order.ID, "ret:", cancel)
 					}
 				}
 			}
@@ -53,11 +53,13 @@ func main() {
 		} else {
 			if usdtAccount.Available > 0 {
 				amount := (usdtAccount.Available - 1) / buyDepth.Price
-				buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", buyDepth.Price), exchange.PAX_USDT)
-				if err != nil {
-					log.Println("limit buy amount:", amount, "price:", buyDepth.Price, "err:", err)
-				} else {
-					log.Println("limit buy success:", buyOrder.ID)
+				if amount > 1 {
+					buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", buyDepth.Price), exchange.PAX_USDT)
+					if err != nil {
+						log.Println("limit buy amount:", amount, "price:", buyDepth.Price, "err:", err)
+					} else {
+						log.Println("limit buy success:", buyOrder.ID)
+					}
 				}
 			}
 		}
@@ -68,11 +70,13 @@ func main() {
 		} else {
 			if paxAccount.Available > 0 {
 				amount := paxAccount.Available - 1
-				sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", sellDepth.Price), exchange.PAX_USDT)
-				if err != nil {
-					log.Println("limit sell amount:", amount, "price:", buyDepth.Price, "err:", err)
-				} else {
-					log.Println("limit sell success:", sellOrder.ID)
+				if amount > 1 {
+					sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", sellDepth.Price), exchange.PAX_USDT)
+					if err != nil {
+						log.Println("limit sell amount:", amount, "price:", buyDepth.Price, "err:", err)
+					} else {
+						log.Println("limit sell success:", sellOrder.ID)
+					}
 				}
 			}
 		}
