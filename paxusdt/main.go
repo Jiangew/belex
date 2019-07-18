@@ -55,7 +55,7 @@ func main() {
 
 		usdtAccount, err := api.GetSubAccount(exchange.USDT)
 		if err != nil {
-			log.Println("usdt account got err:", err)
+			log.Println("usdt account got error:", err)
 		} else {
 			if usdtAccount.Available > 0 {
 				if (lastBuyMaxPrice > 0 && buyDepth.Price > lastBuyMaxPrice) || (lastBuyMinPrice > 0 && buyDepth.Price < lastBuyMinPrice) {
@@ -64,9 +64,13 @@ func main() {
 					amount := (usdtAccount.Available - 1) / buyDepth.Price
 					if amount > 1 {
 						buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", buyDepth.Price), exchange.PAX_USDT)
-						log.Println("limit buy amount:", amount, "price:", buyDepth.Price, "success:", buyOrder.ID, "err:", err)
-						lastBuyMinPrice = buyDepth.Price * 999 / 1000
-						lastBuyMaxPrice = buyDepth.Price * 1001 / 1000
+						if err != nil {
+							log.Println("limit buy amount:", amount, "price:", buyDepth.Price, "error:", err)
+						} else {
+							log.Println("limit buy amount:", amount, "price:", buyDepth.Price, "success:", buyOrder.ID)
+							lastBuyMinPrice = buyDepth.Price * 999 / 1000
+							lastBuyMaxPrice = buyDepth.Price * 1001 / 1000
+						}
 					}
 				}
 			}
@@ -74,7 +78,7 @@ func main() {
 
 		paxAccount, err := api.GetSubAccount(exchange.PAX)
 		if err != nil {
-			log.Println("pax account got err:", err)
+			log.Println("pax account got error:", err)
 		} else {
 			if paxAccount.Available > 0 {
 				if (lastSellMaxPrice > 0 && sellDepth.Price > lastSellMaxPrice) || (lastSellMinPrice > 0 && sellDepth.Price < lastSellMinPrice) {
@@ -83,9 +87,13 @@ func main() {
 					amount := paxAccount.Available - 1
 					if amount > 1 {
 						sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", sellDepth.Price), exchange.PAX_USDT)
-						log.Println("limit sell amount:", amount, "price:", buyDepth.Price, "success:", sellOrder.ID, "err:", err)
-						lastSellMinPrice = sellDepth.Price * 999 / 1000
-						lastBuyMaxPrice = sellDepth.Price * 1001 / 1000
+						if err != nil {
+							log.Println("limit sell amount:", amount, "price:", buyDepth.Price, "error:", err)
+						} else {
+							log.Println("limit sell amount:", amount, "price:", buyDepth.Price, "success:", sellOrder.ID)
+							lastSellMinPrice = sellDepth.Price * 999 / 1000
+							lastBuyMaxPrice = sellDepth.Price * 1001 / 1000
+						}
 					}
 				}
 			}
