@@ -16,11 +16,6 @@ func main() {
 	apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second)
 	api := apiBuilder.APIKey("1412ac27e3f741c796f7c4600069d9f1").APISecretkey("4843754749be46919d986142917f06d7").Build(exchange.FCOIN)
 
-	lastBuyMinPrice := float64(0)
-	lastBuyMaxPrice := float64(0)
-	lastSellMinPrice := float64(0)
-	lastSellMaxPrice := float64(0)
-
 	orders, _ := api.GetActiveOrders(exchange.PAX_USDT)
 	if len(orders) > 0 {
 		for _, order := range orders {
@@ -58,19 +53,13 @@ func main() {
 			log.Println("usdt account got error:", err)
 		} else {
 			if usdtAccount.Available > 0 {
-				if (lastBuyMaxPrice > 0 && buyDepth.Price > lastBuyMaxPrice) || (lastBuyMinPrice > 0 && buyDepth.Price < lastBuyMinPrice) {
-					log.Println("limit buy exceeded limit price:", buyDepth.Price)
-				} else {
-					amount := (usdtAccount.Available - 1) / buyDepth.Price
-					if amount > 1 {
-						buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", buyDepth.Price), exchange.PAX_USDT)
-						if err != nil {
-							log.Println("limit buy amount:", amount, "price:", buyDepth.Price, "error:", err)
-						} else {
-							log.Println("limit buy amount:", amount, "price:", buyDepth.Price, "success:", buyOrder.ID)
-							lastBuyMinPrice = buyDepth.Price * 999 / 1000
-							lastBuyMaxPrice = buyDepth.Price * 1001 / 1000
-						}
+				amount := (usdtAccount.Available - 1) / buyDepth.Price
+				if amount > 1 {
+					buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", buyDepth.Price), exchange.PAX_USDT)
+					if err != nil {
+						log.Println("limit buy amount:", amount, "price:", buyDepth.Price, "error:", err)
+					} else {
+						log.Println("limit buy amount:", amount, "price:", buyDepth.Price, "success:", buyOrder.ID)
 					}
 				}
 			}
@@ -81,19 +70,13 @@ func main() {
 			log.Println("pax account got error:", err)
 		} else {
 			if paxAccount.Available > 0 {
-				if (lastSellMaxPrice > 0 && sellDepth.Price > lastSellMaxPrice) || (lastSellMinPrice > 0 && sellDepth.Price < lastSellMinPrice) {
-					log.Println("limit sell exceeded limit price:", sellDepth.Price)
-				} else {
-					amount := paxAccount.Available - 1
-					if amount > 1 {
-						sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", sellDepth.Price), exchange.PAX_USDT)
-						if err != nil {
-							log.Println("limit sell amount:", amount, "price:", buyDepth.Price, "error:", err)
-						} else {
-							log.Println("limit sell amount:", amount, "price:", buyDepth.Price, "success:", sellOrder.ID)
-							lastSellMinPrice = sellDepth.Price * 999 / 1000
-							lastBuyMaxPrice = sellDepth.Price * 1001 / 1000
-						}
+				amount := paxAccount.Available - 1
+				if amount > 1 {
+					sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", sellDepth.Price), exchange.PAX_USDT)
+					if err != nil {
+						log.Println("limit sell amount:", amount, "price:", buyDepth.Price, "error:", err)
+					} else {
+						log.Println("limit sell amount:", amount, "price:", buyDepth.Price, "success:", sellOrder.ID)
 					}
 				}
 			}
