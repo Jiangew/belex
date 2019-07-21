@@ -82,11 +82,14 @@ func main() {
 			log.Println("pax account got error:", err)
 		} else {
 			if paxAccount.Available > 10 {
-				sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", paxAccount.Available), fmt.Sprintf("%.4f", sellPrice), exchange.PAX_USDT)
-				if err != nil {
-					log.Println("limit sell amount:", paxAccount.Available, "price:", sellPrice, "error:", err)
-				} else {
-					log.Println("limit sell amount:", paxAccount.Available, "price:", sellPrice, "success:", sellOrder.ID)
+				amount := paxAccount.Available - 1
+				if amount > 1 {
+					sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", sellPrice), exchange.PAX_USDT)
+					if err != nil {
+						log.Println("limit sell amount:", amount, "price:", sellPrice, "error:", err)
+					} else {
+						log.Println("limit sell amount:", amount, "price:", sellPrice, "success:", sellOrder.ID)
+					}
 				}
 			}
 		}
