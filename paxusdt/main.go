@@ -5,11 +5,10 @@ import (
 	"github.com/jiangew/belex/builder"
 	"github.com/jiangew/belex/exchange"
 	"log"
-	"sync"
 	"time"
 )
 
-var wg sync.WaitGroup
+//var wg sync.WaitGroup
 
 func main() {
 	//bot, err := tgbotapi.NewBotAPI("960133387:AAGZ3dZ1FPO-lVJmVTUYsMxDZFUR5WDEEc0")
@@ -64,7 +63,7 @@ func main() {
 		if err != nil {
 			log.Println("usdt account got error:", err)
 		} else {
-			if usdtAccount.Available > 10 {
+			if usdtAccount.Available > 100 {
 				amount := (usdtAccount.Available - 1) / buyPrice
 				if amount > 1 {
 					buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", buyPrice), exchange.PAX_USDT)
@@ -81,7 +80,7 @@ func main() {
 		if err != nil {
 			log.Println("pax account got error:", err)
 		} else {
-			if paxAccount.Available > 10 {
+			if paxAccount.Available > 100 {
 				amount := paxAccount.Available - 1
 				if amount > 1 {
 					sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", sellPrice), exchange.PAX_USDT)
