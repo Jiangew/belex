@@ -63,7 +63,7 @@ func main() {
 		if err != nil {
 			log.Println("usdt account got error:", err)
 		} else {
-			if usdtAccount.Available > 100 {
+			if usdtAccount.Available > 200 {
 				amount := (usdtAccount.Available - 1) / buyPrice
 				if amount > 1 {
 					buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", buyPrice), exchange.PAX_USDT)
@@ -80,7 +80,7 @@ func main() {
 		if err != nil {
 			log.Println("pax account got error:", err)
 		} else {
-			if paxAccount.Available > 100 {
+			if paxAccount.Available > 200 {
 				amount := paxAccount.Available - 1
 				if amount > 1 {
 					sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", sellPrice), exchange.PAX_USDT)
