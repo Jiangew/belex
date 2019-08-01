@@ -17,6 +17,7 @@ func main() {
 	//}
 
 	//apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second).HttpProxy("socks5://127.0.0.1:1086")
+
 	apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second)
 	api := apiBuilder.APIKey("1412ac27e3f741c796f7c4600069d9f1").APISecretkey("4843754749be46919d986142917f06d7").Build(exchange.FCOIN)
 
@@ -29,8 +30,14 @@ func main() {
 	}
 
 	for {
+		lastBuyMinPrice := float64(0)
+		lastBuyMaxPrice := float64(0)
 		buyPrice := float64(0)
+
+		lastSellMinPrice := float64(0)
+		lastSellMaxPrice := float64(0)
 		sellPrice := float64(0)
+
 		taker, err := api.GetTicker(exchange.PAX_USDT)
 		if err != nil {
 			log.Println("usdt account got error:", err)
@@ -64,13 +71,19 @@ func main() {
 			log.Println("usdt account got error:", err)
 		} else {
 			if usdtAccount.Available > 200 {
-				amount := (usdtAccount.Available - 1) / buyPrice
-				if amount > 1 {
-					buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", buyPrice), exchange.PAX_USDT)
-					if err != nil {
-						log.Println("limit buy amount:", amount, "price:", buyPrice, "error:", err)
-					} else {
-						log.Println("limit buy amount:", amount, "price:", buyPrice, "success:", buyOrder.ID)
+				if (lastBuyMaxPrice > 0 && buyPrice > lastBuyMaxPrice) || (lastBuyMinPrice > 0 && buyPrice < lastBuyMinPrice) {
+					log.Println("limit buy exceeded limit price:", buyPrice)
+				} else {
+					amount := (usdtAccount.Available - 1) / buyPrice
+					if amount > 1 {
+						buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", buyPrice), exchange.PAX_USDT)
+						if err != nil {
+							log.Println("limit buy amount:", amount, "price:", buyPrice, "error:", err)
+						} else {
+							log.Println("limit buy amount:", amount, "price:", buyPrice, "success:", buyOrder.ID)
+							lastBuyMinPrice = buyPrice * 999 / 1000
+							lastBuyMaxPrice = buyPrice * 1001 / 1000
+						}
 					}
 				}
 			}
@@ -81,59 +94,24 @@ func main() {
 			log.Println("pax account got error:", err)
 		} else {
 			if paxAccount.Available > 200 {
-				amount := paxAccount.Available - 1
-				if amount > 1 {
-					sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", sellPrice), exchange.PAX_USDT)
-					if err != nil {
-						log.Println("limit sell amount:", amount, "price:", sellPrice, "error:", err)
-					} else {
-						log.Println("limit sell amount:", amount, "price:", sellPrice, "success:", sellOrder.ID)
+				if (lastSellMaxPrice > 0 && sellPrice > lastSellMaxPrice) || (lastSellMinPrice > 0 && sellPrice < lastSellMinPrice) {
+					log.Println("limit sell exceeded limit price:", sellPrice)
+				} else {
+					amount := paxAccount.Available - 1
+					if amount > 1 {
+						sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", sellPrice), exchange.PAX_USDT)
+						if err != nil {
+							log.Println("limit sell amount:", amount, "price:", sellPrice, "error:", err)
+						} else {
+							log.Println("limit sell amount:", amount, "price:", sellPrice, "success:", sellOrder.ID)
+							lastSellMinPrice = sellPrice * 999 / 1000
+							lastBuyMaxPrice = sellPrice * 1001 / 1000
+						}
 					}
 				}
 			}
 		}
 
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(200 * time.Millisecond)
 	}
 }
-
-//func printfTicker(ticker *exchange.Ticker) {
-//	fmt.Println("ticker ", ticker)
-//}
-//
-//func printfDepth(depth *exchange.Depth) {
-//	fmt.Println("depth ", depth)
-//}
-//
-//func printfTrade(trade *exchange.Trade) {
-//	fmt.Println("trade ", trade)
-//}
-//
-//func printfKline(kline *exchange.Kline, period int) {
-//	fmt.Println("kline ", kline)
-//}
-
-//func main() {
-//	fcws := fcoin.NewFCoinWs(&http.Client{
-//		Transport: &http.Transport{
-//			Proxy: func(req *http.Request) (*url.URL, error) {
-//				return url.Parse("socks5://127.0.0.1:1086")
-//				return nil, nil
-//			},
-//			Dial: (&net.Dialer{
-//				Timeout: 10 * time.Second,
-//			}).Dial,
-//		},
-//		Timeout: 10 * time.Second,
-//	}, "1412ac27e3f741c796f7c4600069d9f1", "4843754749be46919d986142917f06d7")
-//
-//	fcws.ProxyUrl("socks5://127.0.0.1:1086")
-//	fcws.SetCallbacks(printfTicker, printfDepth, printfTrade, printfKline)
-//
-//	fcws.SubscribeTicker(exchange.PAX_USDT)
-//	fcws.SubscribeDepth(exchange.PAX_USDT, 2)
-//	fcws.SubscribeKline(exchange.PAX_USDT, exchange.KLINE_PERIOD_1MIN)
-//	fcws.SubscribeTrade(exchange.PAX_USDT)
-//
-//	time.Sleep(60 * 60 * time.Second)
-//}
