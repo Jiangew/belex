@@ -81,8 +81,8 @@ func main() {
 							log.Println("limit buy amount:", amount, "price:", buyPrice, "error:", err)
 						} else {
 							log.Println("limit buy amount:", amount, "price:", buyPrice, "success:", buyOrder.ID)
-							lastBuyMinPrice = buyPrice * 999 / 1000
-							lastBuyMaxPrice = buyPrice * 1001 / 1000
+							lastBuyMinPrice = buyPrice * 9997 / 10000
+							lastBuyMaxPrice = buyPrice * 10003 / 10000
 						}
 					}
 				}
@@ -104,8 +104,8 @@ func main() {
 							log.Println("limit sell amount:", amount, "price:", sellPrice, "error:", err)
 						} else {
 							log.Println("limit sell amount:", amount, "price:", sellPrice, "success:", sellOrder.ID)
-							lastSellMinPrice = sellPrice * 999 / 1000
-							lastBuyMaxPrice = sellPrice * 1001 / 1000
+							lastSellMinPrice = sellPrice * 9997 / 10000
+							lastBuyMaxPrice = sellPrice * 10003 / 10000
 						}
 					}
 				}
