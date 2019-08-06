@@ -14,11 +14,10 @@ import (
 )
 
 const (
-	DEPTH_API       = "market/depth/%s/%s"
-	TRADE_URL       = "orders"
-	GET_ACCOUNT_API = "accounts/balance"
-	GET_ORDER_API   = "orders/%s"
-	//GET_ORDERS_LIST_API             = ""
+	DEPTH_API                 = "market/depth/%s/%s"
+	TRADE_URL                 = "orders"
+	GET_ACCOUNT_API           = "accounts/balance"
+	GET_ORDER_API             = "orders/%s"
 	GET_UNFINISHED_ORDERS_API = "getUnfinishedOrdersIgnoreTradeType"
 	PLACE_ORDER_API           = "order"
 	WITHDRAW_API              = "withdraw"
@@ -48,113 +47,6 @@ type TradeSymbol struct {
 	PriceDecimal  int    `json:"price_decimal"`
 	AmountDecimal int    `json:"amount_decimal"`
 	Tradable      bool   `json:"tradable"`
-}
-
-func NewFCoin(client *http.Client, apikey, secretkey string) *FCoin {
-	fc := &FCoin{baseUrl: "https://api.fcoin.com/v2/", accessKey: apikey, secretKey: secretkey, httpClient: client}
-	fc.setTimeOffset()
-	fc.tradeSymbols, _ = fc.getTradeSymbols()
-	return fc
-}
-
-func (fc *FCoin) GetExchangeName() string {
-	return exchange.FCOIN
-}
-
-func (fc *FCoin) setTimeOffset() error {
-	respmap, err := exchange.HttpGet(fc.httpClient, fc.baseUrl+"public/server-time")
-	if err != nil {
-		return err
-	}
-	stime := int64(exchange.ToInt(respmap["data"]))
-	st := time.Unix(stime/1000, 0)
-	lt := time.Now()
-	offset := st.Sub(lt).Seconds()
-	fc.timeoffset = int64(offset)
-	return nil
-}
-
-func (fc *FCoin) GetTicker(symbol exchange.Symbol) (*exchange.Ticker, error) {
-	respmap, err := exchange.HttpGet(fc.httpClient, fc.baseUrl+fmt.Sprintf("market/ticker/%s", strings.ToLower(symbol.ToSymbol(""))))
-	if err != nil {
-		return nil, err
-	}
-
-	if respmap["status"].(float64) != 0 {
-		return nil, errors.New(respmap["msg"].(string))
-	}
-
-	tick, ok := respmap["data"].(map[string]interface{})
-	if !ok {
-		return nil, exchange.API_ERR
-	}
-
-	tickmap, ok := tick["ticker"].([]interface{})
-	if !ok {
-		return nil, exchange.API_ERR
-	}
-
-	ticker := new(exchange.Ticker)
-	ticker.Symbol = symbol.ToSymbol("/")
-	ticker.Date = uint64(time.Now().UnixNano() / 1000000)
-
-	ticker.Last = exchange.ToFloat64(tickmap[0])
-	ticker.LastVol = exchange.ToFloat64(tickmap[1])
-	ticker.Buy = exchange.ToFloat64(tickmap[2])
-	ticker.BuyVol = exchange.ToFloat64(tickmap[3])
-	ticker.Sell = exchange.ToFloat64(tickmap[4])
-	ticker.SellVol = exchange.ToFloat64(tickmap[5])
-	ticker.High = exchange.ToFloat64(tickmap[7])
-	ticker.Low = exchange.ToFloat64(tickmap[8])
-	ticker.Vol = exchange.ToFloat64(tickmap[9])
-
-	return ticker, nil
-}
-
-func (fc *FCoin) GetDepth(size int, symbol exchange.Symbol) (*exchange.Depth, error) {
-	respmap, err := exchange.HttpGet(fc.httpClient, fc.baseUrl+fmt.Sprintf("market/depth/L20/%s", strings.ToLower(symbol.ToSymbol(""))))
-	if err != nil {
-		return nil, err
-	}
-
-	if respmap["status"].(float64) != 0 {
-		return nil, errors.New(respmap["msg"].(string))
-	}
-
-	datamap := respmap["data"].(map[string]interface{})
-	bids, ok1 := datamap["bids"].([]interface{})
-	asks, ok2 := datamap["asks"].([]interface{})
-
-	if !ok1 || !ok2 {
-		return nil, errors.New("depth error")
-	}
-
-	depth := new(exchange.Depth)
-	depth.Symbol = symbol.ToSymbol("/")
-	depth.UTime = time.Now()
-
-	n := 0
-	for i := 0; i < len(bids); {
-		depth.BidList = append(depth.BidList, exchange.DepthRecord{exchange.ToFloat64(bids[i]), exchange.ToFloat64(bids[i+1])})
-		i += 2
-		n++
-		if n == size {
-			break
-		}
-	}
-
-	n = 0
-	for i := 0; i < len(asks); {
-		depth.AskList = append(depth.AskList, exchange.DepthRecord{exchange.ToFloat64(asks[i]), exchange.ToFloat64(asks[i+1])})
-		i += 2
-		n++
-		if n == size {
-			break
-		}
-	}
-
-	//sort.Sort(sort.Reverse(depth.AskList))
-	return depth, nil
 }
 
 func (fc *FCoin) doAuthenticatedRequest(method, uri string, params url.Values) (interface{}, error) {
@@ -189,7 +81,7 @@ func (fc *FCoin) doAuthenticatedRequest(method, uri string, params url.Values) (
 			return nil, err
 		}
 
-		json.Unmarshal(respbody, &respmap)
+		_ = json.Unmarshal(respbody, &respmap)
 	}
 
 	//log.Println(respmap)
@@ -205,35 +97,127 @@ func (fc *FCoin) buildSigned(httpmethod string, apiurl string, timestamp int64, 
 		param = ""
 		err   error
 	)
-
 	if para != nil {
 		param = para.Encode()
 	}
-
 	if "GET" == httpmethod && param != "" {
 		apiurl += "?" + param
 	}
-
 	signStr := httpmethod + apiurl + fmt.Sprint(timestamp)
 	if "POST" == httpmethod && param != "" {
 		signStr += param
 	}
-
-	signStr2, err := url.QueryUnescape(signStr) // 不需要编码
+	signStr2, err := url.QueryUnescape(signStr)
 	if err != nil {
 		signStr2 = signStr
 	}
-
 	sign := base64.StdEncoding.EncodeToString([]byte(signStr2))
-
 	mac := hmac.New(sha1.New, []byte(fc.secretKey))
-
 	mac.Write([]byte(sign))
 	sum := mac.Sum(nil)
-
 	s := base64.StdEncoding.EncodeToString(sum)
-	//log.Println(s)
+
 	return s
+}
+
+func NewFCoin(client *http.Client, apikey, secretkey string) *FCoin {
+	fc := &FCoin{baseUrl: "https://api.fcoin.com/v2/", accessKey: apikey, secretKey: secretkey, httpClient: client}
+	_ = fc.setTimeOffset()
+	fc.tradeSymbols, _ = fc.getTradeSymbols()
+	return fc
+}
+
+func (fc *FCoin) GetExchangeName() string {
+	return exchange.FCOIN
+}
+
+func (fc *FCoin) setTimeOffset() error {
+	respmap, err := exchange.HttpGet(fc.httpClient, fc.baseUrl+"public/server-time")
+	if err != nil {
+		return err
+	}
+	stime := int64(exchange.ToInt(respmap["data"]))
+	st := time.Unix(stime/1000, 0)
+	lt := time.Now()
+	offset := st.Sub(lt).Seconds()
+	fc.timeoffset = int64(offset)
+	return nil
+}
+
+func (fc *FCoin) GetTicker(symbol exchange.Symbol) (*exchange.Ticker, error) {
+	respmap, err := exchange.HttpGet(fc.httpClient, fc.baseUrl+fmt.Sprintf("market/ticker/%s", strings.ToLower(symbol.ToSymbol(""))))
+	if err != nil {
+		return nil, err
+	}
+	if respmap["status"].(float64) != 0 {
+		return nil, errors.New(respmap["msg"].(string))
+	}
+	tick, ok := respmap["data"].(map[string]interface{})
+	if !ok {
+		return nil, exchange.API_ERR
+	}
+	tickmap, ok := tick["ticker"].([]interface{})
+	if !ok {
+		return nil, exchange.API_ERR
+	}
+	ticker := new(exchange.Ticker)
+	ticker.Symbol = symbol.ToSymbol("/")
+	ticker.Date = uint64(time.Now().UnixNano() / 1000000)
+	ticker.Last = exchange.ToFloat64(tickmap[0])
+	ticker.LastVol = exchange.ToFloat64(tickmap[1])
+	ticker.Buy = exchange.ToFloat64(tickmap[2])
+	ticker.BuyVol = exchange.ToFloat64(tickmap[3])
+	ticker.Sell = exchange.ToFloat64(tickmap[4])
+	ticker.SellVol = exchange.ToFloat64(tickmap[5])
+	ticker.High = exchange.ToFloat64(tickmap[7])
+	ticker.Low = exchange.ToFloat64(tickmap[8])
+	ticker.Vol = exchange.ToFloat64(tickmap[9])
+
+	return ticker, nil
+}
+
+func (fc *FCoin) GetDepth(size int, symbol exchange.Symbol) (*exchange.Depth, error) {
+	respmap, err := exchange.HttpGet(fc.httpClient, fc.baseUrl+fmt.Sprintf("market/depth/L20/%s", strings.ToLower(symbol.ToSymbol(""))))
+	if err != nil {
+		return nil, err
+	}
+	if respmap["status"].(float64) != 0 {
+		return nil, errors.New(respmap["msg"].(string))
+	}
+
+	datamap := respmap["data"].(map[string]interface{})
+	bids, ok1 := datamap["bids"].([]interface{})
+	asks, ok2 := datamap["asks"].([]interface{})
+	if !ok1 || !ok2 {
+		return nil, errors.New("depth error")
+	}
+
+	depth := new(exchange.Depth)
+	depth.Symbol = symbol.ToSymbol("/")
+	depth.UTime = time.Now()
+
+	n := 0
+	for i := 0; i < len(bids); {
+		depth.BidList = append(depth.BidList, exchange.DepthRecord{exchange.ToFloat64(bids[i]), exchange.ToFloat64(bids[i+1])})
+		i += 2
+		n++
+		if n == size {
+			break
+		}
+	}
+
+	n = 0
+	for i := 0; i < len(asks); {
+		depth.AskList = append(depth.AskList, exchange.DepthRecord{exchange.ToFloat64(asks[i]), exchange.ToFloat64(asks[i+1])})
+		i += 2
+		n++
+		if n == size {
+			break
+		}
+	}
+
+	//sort.Sort(sort.Reverse(depth.AskList))
+	return depth, nil
 }
 
 func (fc *FCoin) placeOrder(orderType, orderSide, amount, price string, symbol exchange.Symbol) (*exchange.NewOrder, error) {
@@ -525,12 +509,70 @@ func (fc *FCoin) GetSubAccount(currency exchange.Currency) (*exchange.SubAccount
 	return subaccount, nil
 }
 
-func (fc *FCoin) GetKlineRecords(symbol exchange.Symbol, period, size, since int) ([]exchange.Kline, error) {
-	panic("not implement")
+func (fc *FCoin) GetKlines(symbol exchange.Symbol) ([]exchange.Kline, error) {
+	respmap, err := exchange.HttpGet(fc.httpClient, fc.baseUrl+fmt.Sprintf("market/candles/M1/%s?limit=10&before=%d", strings.ToLower(symbol.ToSymbol("")), time.Now().Unix()))
+	if err != nil {
+		return nil, err
+	}
+
+	if respmap["status"].(float64) != 0 {
+		return nil, errors.New(respmap["msg"].(string))
+	}
+
+	datamap := respmap["data"].([]interface{})
+	klines := make([]exchange.Kline, 0)
+	for _, v := range datamap {
+		vv := v.(map[string]interface{})
+		var kline exchange.Kline
+		kline.Symbol = symbol
+		kline.Timestamp = int64(vv["id"].(float64))
+		kline.Vol = vv["quote_vol"].(float64)
+		kline.Open = vv["open"].(float64)
+		kline.High = vv["high"].(float64)
+		kline.Low = vv["low"].(float64)
+		kline.Close = vv["close"].(float64)
+		klines = append(klines, kline)
+	}
+
+	return klines, nil
+}
+
+func (fc *FCoin) IsOrderable(symbol exchange.Symbol) (bool, error) {
+	respmap, err := exchange.HttpGet(fc.httpClient, fc.baseUrl+fmt.Sprintf("market/candles/M1/%s?limit=10&before=%d", strings.ToLower(symbol.ToSymbol("")), time.Now().Unix()))
+	if err != nil {
+		return false, err
+	}
+
+	if respmap["status"].(float64) != 0 {
+		return false, errors.New(respmap["msg"].(string))
+	}
+
+	datamap := respmap["data"].([]interface{})
+	//ranges := make([]string, 0)
+	isOrderable := false
+	var highLow string
+	curse := 1
+	for _, v := range datamap {
+		vv := v.(map[string]interface{})
+		high := vv["high"].(float64)
+		low := vv["low"].(float64)
+		//ranges = append(ranges, fmt.Sprintf("%.4f", high-low))
+		if curse == 1 {
+			highLow = fmt.Sprintf("%.4f", high-low)
+		} else {
+			if highLow == fmt.Sprintf("%.4f", high-low) {
+				isOrderable = true
+			}
+		}
+
+		curse++
+	}
+
+	return isOrderable, nil
 }
 
 func (fc *FCoin) GetTrades(symbol exchange.Symbol, since int64) ([]exchange.Trade, error) {
-	panic("not implement")
+	panic("todo implement")
 }
 
 func (fc *FCoin) getTradeSymbols() ([]TradeSymbol, error) {
@@ -544,7 +586,6 @@ func (fc *FCoin) getTradeSymbols() ([]TradeSymbol, error) {
 	}
 
 	datamap := respmap["data"].([]interface{})
-
 	tradeSymbols := make([]TradeSymbol, 0)
 	for _, v := range datamap {
 		vv := v.(map[string]interface{})

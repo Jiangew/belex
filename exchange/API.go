@@ -6,22 +6,23 @@ type API interface {
 	GetAccount() (*Account, error)
 	GetSubAccount(currency Currency) (*SubAccount, error)
 
-	LimitBuy(amount, price string, currency Symbol) (*NewOrder, error)
-	LimitSell(amount, price string, currency Symbol) (*NewOrder, error)
+	LimitBuy(amount, price string, symbol Symbol) (*NewOrder, error)
+	LimitSell(amount, price string, symbol Symbol) (*NewOrder, error)
 
-	MarketBuy(amount, price string, currency Symbol) (*NewOrder, error)
-	MarketSell(amount, price string, currency Symbol) (*NewOrder, error)
+	MarketBuy(amount, price string, symbol Symbol) (*NewOrder, error)
+	MarketSell(amount, price string, symbol Symbol) (*NewOrder, error)
 
-	GetActiveOrders(currency Symbol) ([]NewOrder, error)
-	CancelOrder(orderId string, currency Symbol) (bool, error)
+	GetActiveOrders(symbol Symbol) ([]NewOrder, error)
+	CancelOrder(orderId string, symbol Symbol) (bool, error)
 
-	GetOrder(orderId string, currency Symbol) (*NewOrder, error)
-	GetOrderHistorys(currency Symbol, currentPage, pageSize int) ([]NewOrder, error)
+	GetOrder(orderId string, symbol Symbol) (*NewOrder, error)
+	GetOrderHistorys(symbol Symbol, currentPage, pageSize int) ([]NewOrder, error)
 
-	GetTicker(currency Symbol) (*Ticker, error)
-	GetDepth(size int, currency Symbol) (*Depth, error)
+	GetTicker(symbol Symbol) (*Ticker, error)
+	GetDepth(size int, symbol Symbol) (*Depth, error)
 
-	GetKlineRecords(currency Symbol, period, size, since int) ([]Kline, error)
+	GetKlines(symbol Symbol) ([]Kline, error)
+	IsOrderable(symbol Symbol) (bool, error)
 
 	GetTrades(symbol Symbol, since int64) ([]Trade, error)
 }

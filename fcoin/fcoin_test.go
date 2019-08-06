@@ -32,6 +32,16 @@ func TestFCoin_GetDepth(t *testing.T) {
 	t.Log(dep.BidList)
 }
 
+func TestFCoin_GetKlines(t *testing.T) {
+	klines, _ := ft.GetKlines(exchange.PAX_USDT)
+	t.Log(klines)
+}
+
+func TestFCoin_IsOrderable(t *testing.T) {
+	isOrderable, _ := ft.IsOrderable(exchange.PAX_USDT)
+	t.Log(isOrderable)
+}
+
 func TestFCoin_GetAccount(t *testing.T) {
 	acc, _ := ft.GetAccount()
 	t.Log(acc)
