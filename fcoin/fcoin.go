@@ -76,7 +76,7 @@ func (fc *FCoin) doAuthenticatedRequest(method, uri string, params url.Values) (
 			parammap[k] = v[0]
 		}
 
-		respbody, err := exchange.HttpPostForm4(fc.httpClient, fc.baseUrl+uri, parammap, header)
+		respbody, err := exchange.HttpPost(fc.httpClient, fc.baseUrl+uri, parammap, header)
 		if err != nil {
 			return nil, err
 		}

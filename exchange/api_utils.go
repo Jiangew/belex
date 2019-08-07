@@ -8,12 +8,12 @@ import (
 )
 
 /**
-  重试 API：一个参数必须是 error
+  Retry API: one error param
   @retry  重试次数
   @delay  每次重试延迟时间间隔
-  @method 调用的函数，比如: api.GetTicker, 注意：不是api.GetTicker(...)
-  @params 参数,顺序一定要按照实际调用函数入参顺序一样
-  @return 返回
+  @method 调用的函数，比如：api.GetTicker，注意：不是 api.GetTicker(...)
+  @params 参数、顺序一定要按照实际调用函数入参顺序一样
+  @return
 */
 func Retry(retry int, delay time.Duration, method interface{}, params ...interface{}) interface{} {
 	invokeM := reflect.ValueOf(method)

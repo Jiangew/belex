@@ -1,10 +1,9 @@
-package builder
+package fcoin
 
 import (
 	"context"
 	"fmt"
 	"github.com/jiangew/belex/exchange"
-	"github.com/jiangew/belex/fcoin"
 	"net"
 	"net/http"
 	"net/url"
@@ -164,9 +163,9 @@ func (builder *APIBuilder) Build(exName string) (api exchange.API) {
 
 	switch exName {
 	case exchange.FCOIN:
-		_api = fcoin.NewFCoin(builder.client, builder.apiKey, builder.secretkey)
+		_api = NewFCoin(builder.client, builder.apiKey, builder.secretkey)
 	case exchange.FCOIN_PRO:
-		_api = fcoin.NewFCoin(builder.client, builder.apiKey, builder.secretkey)
+		_api = NewFCoin(builder.client, builder.apiKey, builder.secretkey)
 	default:
 		println("exchange name error [" + exName + "].")
 

@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/jiangew/belex/builder"
 	"github.com/jiangew/belex/exchange"
+	"github.com/jiangew/belex/fcoin"
 	"log"
 	"time"
 )
@@ -17,7 +17,7 @@ func main() {
 	//}
 
 	//apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second).HttpProxy("socks5://127.0.0.1:1086")
-	apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second)
+	apiBuilder := fcoin.NewAPIBuilder().HttpTimeout(5 * time.Second)
 	api := apiBuilder.APIKey("1412ac27e3f741c796f7c4600069d9f1").APISecretkey("4843754749be46919d986142917f06d7").Build(exchange.FCOIN)
 
 	orders, _ := api.GetActiveOrders(exchange.PAX_USDT)

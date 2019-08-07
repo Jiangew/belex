@@ -1,4 +1,4 @@
-package builder
+package fcoin
 
 import (
 	"github.com/jiangew/belex/exchange"
