@@ -17,7 +17,6 @@ func main() {
 	//}
 
 	//apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second).HttpProxy("socks5://127.0.0.1:1086")
-
 	apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second)
 	api := apiBuilder.APIKey("1412ac27e3f741c796f7c4600069d9f1").APISecretkey("4843754749be46919d986142917f06d7").Build(exchange.FCOIN)
 
@@ -29,15 +28,14 @@ func main() {
 		}
 	}
 
+	buyPrice := float64(0)
+	sellPrice := float64(0)
+	lastBuyMinPrice := float64(0)
+	lastBuyMaxPrice := float64(0)
+	lastSellMinPrice := float64(0)
+	lastSellMaxPrice := float64(0)
+
 	for {
-		lastBuyMinPrice := float64(0)
-		lastBuyMaxPrice := float64(0)
-		buyPrice := float64(0)
-
-		lastSellMinPrice := float64(0)
-		lastSellMaxPrice := float64(0)
-		sellPrice := float64(0)
-
 		taker, err := api.GetTicker(exchange.PAX_USDT)
 		if err != nil {
 			log.Println("usdt account got error:", err)
@@ -121,6 +119,23 @@ func main() {
 				}
 			}
 		}
+
+		//paxAccount, err := api.GetSubAccount(exchange.PAX)
+		//if err != nil {
+		//	log.Println("pax account got error:", err)
+		//} else {
+		//	if paxAccount.Available > 10 {
+		//		amount := paxAccount.Available - 1
+		//		if amount > 1 {
+		//			sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", sellPrice), exchange.PAX_USDT)
+		//			if err != nil {
+		//				log.Println("limit sell amount:", amount, "price:", sellPrice, "error:", err)
+		//			} else {
+		//				log.Println("limit sell amount:", amount, "price:", sellPrice, "success:", sellOrder.ID)
+		//			}
+		//		}
+		//	}
+		//}
 
 		time.Sleep(200 * time.Millisecond)
 	}

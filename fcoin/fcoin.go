@@ -518,7 +518,7 @@ func (fc *FCoin) GetKlines(symbol exchange.Symbol) ([]exchange.Kline, error) {
 }
 
 func (fc *FCoin) IsOrderable(symbol exchange.Symbol) (bool, error) {
-	respmap, err := exchange.HttpGet(fc.httpClient, fc.baseUrl+fmt.Sprintf("market/candles/M1/%s?limit=15&before=%d", strings.ToLower(symbol.ToSymbol("")), time.Now().Unix()))
+	respmap, err := exchange.HttpGet(fc.httpClient, fc.baseUrl+fmt.Sprintf("market/candles/M5/%s?limit=6&before=%d", strings.ToLower(symbol.ToSymbol("")), time.Now().Unix()))
 	if err != nil {
 		return false, err
 	}
@@ -537,22 +537,24 @@ func (fc *FCoin) IsOrderable(symbol exchange.Symbol) (bool, error) {
 
 	for _, v := range datamap {
 		vv := v.(map[string]interface{})
-		curHigh := vv["high"].(float64)
-		curLow := vv["low"].(float64)
+		//id := int64(vv["id"].(float64))
+		curHigh := exchange.FloatToString(vv["high"].(float64), 4)
+		curLow := exchange.FloatToString(vv["low"].(float64), 4)
 
 		if curse == 1 {
-			high = fmt.Sprintf("%.4f", curHigh)
-			low = fmt.Sprintf("%.4f", curLow)
+			high = curHigh
+			low = curLow
 		} else {
-			if high == fmt.Sprintf("%.4f", curHigh) {
+			if high == curHigh {
 				highEq = true
 			}
-			if low == fmt.Sprintf("%.4f", curLow) {
+			if low == curLow {
 				lowEq = true
 			}
+			//log.Println(id, high, curHigh, low, curLow)
 		}
 
-		curse++
+		curse = curse + 1
 	}
 
 	if highEq && lowEq {
