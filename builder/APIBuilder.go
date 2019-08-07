@@ -40,10 +40,12 @@ func (c *HttpClientConfig) SetProxyUrl(proxyUrl string) *HttpClientConfig {
 	if proxyUrl == "" {
 		return c
 	}
+
 	proxy, err := url.Parse(proxyUrl)
 	if err != nil {
 		return c
 	}
+
 	c.Proxy = proxy
 	return c
 }
@@ -58,6 +60,7 @@ var (
 		Proxy:        nil,
 		HttpTimeout:  5 * time.Second,
 		MaxIdleConns: 10}
+
 	DefaultAPIBuilder = NewAPIBuilder()
 )
 
@@ -69,6 +72,7 @@ func NewAPIBuilder2(config *HttpClientConfig) *APIBuilder {
 	if config == nil {
 		config = DefaultHttpClientConfig
 	}
+
 	return &APIBuilder{
 		HttpClientConfig: config,
 		client: &http.Client{
@@ -104,13 +108,16 @@ func (builder *APIBuilder) HttpProxy(proxyUrl string) (_builder *APIBuilder) {
 	if proxyUrl == "" {
 		return builder
 	}
+
 	proxy, err := url.Parse(proxyUrl)
 	if err != nil {
 		return builder
 	}
+
 	builder.HttpClientConfig.Proxy = proxy
 	transport := builder.client.Transport.(*http.Transport)
 	transport.Proxy = http.ProxyURL(proxy)
+
 	return builder
 }
 
@@ -118,6 +125,7 @@ func (builder *APIBuilder) HttpTimeout(timeout time.Duration) (_builder *APIBuil
 	builder.HttpClientConfig.HttpTimeout = timeout
 	builder.httpTimeout = timeout
 	builder.client.Timeout = timeout
+
 	transport := builder.client.Transport.(*http.Transport)
 	if transport != nil {
 		//transport.ResponseHeaderTimeout = timeout
@@ -127,6 +135,7 @@ func (builder *APIBuilder) HttpTimeout(timeout time.Duration) (_builder *APIBuil
 			return net.DialTimeout(network, addr, timeout)
 		}
 	}
+
 	return builder
 }
 
@@ -152,6 +161,7 @@ func (builder *APIBuilder) ApiPassphrase(apiPassphrase string) (_builder *APIBui
 
 func (builder *APIBuilder) Build(exName string) (api exchange.API) {
 	var _api exchange.API
+
 	switch exName {
 	case exchange.FCOIN:
 		_api = fcoin.NewFCoin(builder.client, builder.apiKey, builder.secretkey)
@@ -161,5 +171,6 @@ func (builder *APIBuilder) Build(exName string) (api exchange.API) {
 		println("exchange name error [" + exName + "].")
 
 	}
+
 	return _api
 }

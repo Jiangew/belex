@@ -30,12 +30,12 @@ func main() {
 	}
 
 	for {
-		//lastBuyMinPrice := float64(0)
-		//lastBuyMaxPrice := float64(0)
+		lastBuyMinPrice := float64(0)
+		lastBuyMaxPrice := float64(0)
 		buyPrice := float64(0)
 
-		//lastSellMinPrice := float64(0)
-		//lastSellMaxPrice := float64(0)
+		lastSellMinPrice := float64(0)
+		lastSellMaxPrice := float64(0)
 		sellPrice := float64(0)
 
 		taker, err := api.GetTicker(exchange.PAX_USDT)
@@ -71,25 +71,25 @@ func main() {
 			log.Println("usdt account got error:", err)
 		} else {
 			if usdtAccount.Available > 500 {
-				//if (lastBuyMaxPrice > 0 && buyPrice > lastBuyMaxPrice) || (lastBuyMinPrice > 0 && buyPrice < lastBuyMinPrice) {
-				//	log.Println("limit buy exceeded limit price:", buyPrice)
-				//}
-
-				isOrderable, _ := api.IsOrderable(exchange.PAX_USDT)
-				if isOrderable {
-					amount := (usdtAccount.Available - 1) / buyPrice
-					if amount > 1 {
-						buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", buyPrice), exchange.PAX_USDT)
-						if err != nil {
-							log.Println("limit buy amount:", amount, "price:", buyPrice, "error:", err)
-						} else {
-							log.Println("limit buy amount:", amount, "price:", buyPrice, "success:", buyOrder.ID)
-							//lastBuyMinPrice = buyPrice * 9997 / 10000
-							//lastBuyMaxPrice = buyPrice * 10003 / 10000
-						}
-					}
+				if (lastBuyMaxPrice > 0 && buyPrice > lastBuyMaxPrice) || (lastBuyMinPrice > 0 && buyPrice < lastBuyMinPrice) {
+					log.Println("limit buy exceeded limit price:", buyPrice)
 				} else {
-					log.Println("limit buy isOrderable:", false)
+					isOrderable, _ := api.IsOrderable(exchange.PAX_USDT)
+					if isOrderable {
+						amount := (usdtAccount.Available - 1) / buyPrice
+						if amount > 1 {
+							buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", buyPrice), exchange.PAX_USDT)
+							if err != nil {
+								log.Println("limit buy amount:", amount, "price:", buyPrice, "error:", err)
+							} else {
+								log.Println("limit buy amount:", amount, "price:", buyPrice, "success:", buyOrder.ID)
+								lastBuyMinPrice = buyPrice * 9997 / 10000
+								lastBuyMaxPrice = buyPrice * 10003 / 10000
+							}
+						}
+					} else {
+						log.Println("limit buy isOrderable:", false)
+					}
 				}
 			}
 		}
@@ -99,25 +99,25 @@ func main() {
 			log.Println("pax account got error:", err)
 		} else {
 			if paxAccount.Available > 500 {
-				//if (lastSellMaxPrice > 0 && sellPrice > lastSellMaxPrice) || (lastSellMinPrice > 0 && sellPrice < lastSellMinPrice) {
-				//	log.Println("limit sell exceeded limit price:", sellPrice)
-				//}
-
-				isOrderable, _ := api.IsOrderable(exchange.PAX_USDT)
-				if isOrderable {
-					amount := paxAccount.Available - 1
-					if amount > 1 {
-						sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", sellPrice), exchange.PAX_USDT)
-						if err != nil {
-							log.Println("limit sell amount:", amount, "price:", sellPrice, "error:", err)
-						} else {
-							log.Println("limit sell amount:", amount, "price:", sellPrice, "success:", sellOrder.ID)
-							//lastSellMinPrice = sellPrice * 9997 / 10000
-							//lastBuyMaxPrice = sellPrice * 10003 / 10000
-						}
-					}
+				if (lastSellMaxPrice > 0 && sellPrice > lastSellMaxPrice) || (lastSellMinPrice > 0 && sellPrice < lastSellMinPrice) {
+					log.Println("limit sell exceeded limit price:", sellPrice)
 				} else {
-					log.Println("limit sell isOrderable:", false)
+					isOrderable, _ := api.IsOrderable(exchange.PAX_USDT)
+					if isOrderable {
+						amount := paxAccount.Available - 1
+						if amount > 1 {
+							sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", sellPrice), exchange.PAX_USDT)
+							if err != nil {
+								log.Println("limit sell amount:", amount, "price:", sellPrice, "error:", err)
+							} else {
+								log.Println("limit sell amount:", amount, "price:", sellPrice, "success:", sellOrder.ID)
+								lastSellMinPrice = sellPrice * 9997 / 10000
+								lastBuyMaxPrice = sellPrice * 10003 / 10000
+							}
+						}
+					} else {
+						log.Println("limit sell isOrderable:", false)
+					}
 				}
 			}
 		}

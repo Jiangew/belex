@@ -8,15 +8,14 @@ import (
 )
 
 /**
-  本函数只适合，返回两个参数的API重试调用，其中一个参数必须是error
+  重试 API：一个参数必须是 error
   @retry  重试次数
   @delay  每次重试延迟时间间隔
-  @method 调用的函数，比如: api.GetTicker ,注意：不是api.GetTicker(...)
+  @method 调用的函数，比如: api.GetTicker, 注意：不是api.GetTicker(...)
   @params 参数,顺序一定要按照实际调用函数入参顺序一样
   @return 返回
 */
-func RE(retry int, delay time.Duration, method interface{}, params ...interface{}) interface{} {
-
+func Retry(retry int, delay time.Duration, method interface{}, params ...interface{}) interface{} {
 	invokeM := reflect.ValueOf(method)
 	if invokeM.Kind() != reflect.Func {
 		return errors.New("method not a function")
@@ -32,20 +31,17 @@ func RE(retry int, delay time.Duration, method interface{}, params ...interface{
 	var retryC int = 0
 
 _CALL:
-
 	if retryC > 0 {
 		log.Println("sleep ", delay, " after re call")
 		time.Sleep(delay)
 	}
 
 	retValues := invokeM.Call(value)
-
 	for _, vl := range retValues {
 		if vl.Type().String() == "error" {
 			if vl.IsNil() {
 				continue
 			}
-
 			log.Println("[api error]", vl)
 			retryC++
 			if retryC <= retry-1 {
@@ -73,15 +69,12 @@ func CancelAllUnfinishedOrders(api API, symbol Symbol) int {
 	}
 
 	c := 0
-
 	for {
-		ret := RE(2, 200*time.Millisecond, api.GetActiveOrders, symbol)
-
+		ret := Retry(2, 200*time.Millisecond, api.GetActiveOrders, symbol)
 		if err, isok := ret.(error); !isok {
 			log.Println("[api error]", err)
 			break
 		}
-
 		if ret == nil {
 			break
 		}
@@ -90,7 +83,6 @@ func CancelAllUnfinishedOrders(api API, symbol Symbol) int {
 		if !isok || len(orders) == 0 {
 			break
 		}
-
 		for _, ord := range orders {
 			_, err := api.CancelOrder(ord.OrderID2, symbol)
 			if err != nil {
@@ -98,7 +90,7 @@ func CancelAllUnfinishedOrders(api API, symbol Symbol) int {
 			} else {
 				c++
 			}
-			time.Sleep(120 * time.Millisecond) //控制频率
+			time.Sleep(120 * time.Millisecond) // race limit
 		}
 	}
 

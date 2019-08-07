@@ -56,7 +56,6 @@ func (state OrderState) String() string {
 
 var orderStates = [...]string{"SUBMITTED", "PARTIAL_FILLED", "PARTIAL_CANCELED", "FILLED", "CANCELED", "PENDING_CANCEL"}
 
-//K线周期
 const (
 	KLINE_PERIOD_1MIN = 1 + iota
 	KLINE_PERIOD_3MIN
@@ -77,7 +76,6 @@ const (
 	KLINE_PERIOD_1YEAR
 )
 
-//exchanges
 const (
 	FCOIN     = "fcoin.com"
 	FCOIN_PRO = "fcoin.pro"

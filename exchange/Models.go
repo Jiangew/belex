@@ -6,17 +6,17 @@ import (
 )
 
 type NewOrder struct {
-	ID            string
-	Symbol        string
-	Side          string
-	OrderType     string
-	Price         float64
-	Amount        float64
-	State         string
-	FilledAmount  float64
-	FillFee       float64
-	Source        string
-	CreatedAt     uint64
+	ID           string
+	Symbol       string
+	Side         string
+	OrderType    string
+	Price        float64
+	Amount       float64
+	State        string
+	FilledAmount float64
+	FillFee      float64
+	Source       string
+	CreatedAt    uint64
 }
 
 type Order struct {
@@ -25,7 +25,7 @@ type Order struct {
 	AvgPrice   float64
 	DealAmount float64
 	Fee        float64
-	Cid        string //客户端自定义ID
+	Cid        string //clientId
 	OrderID2   string
 	OrderID    int //deprecated
 	OrderTime  int
@@ -93,10 +93,10 @@ func (dr DepthRecords) Less(i, j int) bool {
 }
 
 type Depth struct {
-	Symbol       string
-	UTime        time.Time
-	AskList      DepthRecords //Descending order
-	BidList      DepthRecords //Descending order
+	Symbol  string
+	UTime   time.Time
+	AskList DepthRecords //Descending order
+	BidList DepthRecords //Descending order
 }
 
 type APIConfig struct {
@@ -107,7 +107,7 @@ type APIConfig struct {
 	ApiPassphrase string //for okex.com v3 api
 	ClientId      string //for bitstamp.net, huobi.pro
 
-	Lever int //杠杆倍数, for future
+	Lever int //杠杆倍数
 }
 
 type Kline struct {
@@ -118,57 +118,4 @@ type Kline struct {
 	High      float64
 	Low       float64
 	Vol       float64
-}
-
-type FutureKline struct {
-	*Kline
-	Vol2 float64 //个数
-}
-
-type FutureSubAccount struct {
-	Currency      Currency
-	AccountRights float64 //账户权益
-	KeepDeposit   float64 //保证金
-	ProfitReal    float64 //已实现盈亏
-	ProfitUnreal  float64
-	RiskRate      float64 //保证金率
-}
-
-type FutureAccount struct {
-	FutureSubAccounts map[Currency]FutureSubAccount
-}
-
-type FutureOrder struct {
-	OrderID2     string //请尽量用这个字段替代OrderID字段
-	Price        float64
-	Amount       float64
-	AvgPrice     float64
-	DealAmount   float64
-	OrderID      int64 //deprecated
-	OrderTime    int64
-	Status       OrderState
-	Currency     Symbol
-	OType        int     //1：开多 2：开空 3：平多 4： 平空
-	LeverRate    int     //倍数
-	Fee          float64 //手续费
-	ContractName string
-}
-
-type FuturePosition struct {
-	BuyAmount      float64
-	BuyAvailable   float64
-	BuyPriceAvg    float64
-	BuyPriceCost   float64
-	BuyProfitReal  float64
-	CreateDate     int64
-	LeverRate      int
-	SellAmount     float64
-	SellAvailable  float64
-	SellPriceAvg   float64
-	SellPriceCost  float64
-	SellProfitReal float64
-	Symbol         Symbol //btc_usd:比特币,ltc_usd:莱特币
-	ContractType   string
-	ContractId     int64
-	ForceLiquPrice float64 //预估爆仓价
 }

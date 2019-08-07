@@ -14,8 +14,8 @@ import (
 type WsConfig struct {
 	WsUrl                 string
 	ProxyUrl              string
-	ReqHeaders            map[string][]string          //连接的时候加入的头部信息
-	HeartbeatIntervalTime time.Duration                //
+	ReqHeaders            map[string][]string //连接的时候加入的头部信息
+	HeartbeatIntervalTime time.Duration
 	HeartbeatData         []byte                       //心跳数据
 	HeartbeatFunc         func() interface{}           //心跳数据2
 	ReconnectIntervalTime time.Duration                //定时重连时间间隔
@@ -33,7 +33,7 @@ type WsConn struct {
 	activeTime  time.Time
 	activeTimeL sync.Mutex
 
-	mu             chan struct{} // lock write data
+	mu             chan struct{} //lock write data
 	closeHeartbeat chan struct{}
 	closeReconnect chan struct{}
 	closeRecv      chan struct{}
@@ -106,6 +106,7 @@ func (b *WsBuilder) Build() *WsConn {
 			log.Println(err)
 		}
 	}
+
 	wsConn := &WsConn{WsConfig: *b.wsConfig}
 	return wsConn.NewWs()
 }
@@ -162,6 +163,7 @@ func (ws *WsConn) SendJsonMessage(v interface{}) error {
 	defer func() {
 		<-ws.mu
 	}()
+
 	return ws.WriteJSON(v)
 }
 
@@ -170,6 +172,7 @@ func (ws *WsConn) SendTextMessage(data []byte) error {
 	defer func() {
 		<-ws.mu
 	}()
+
 	return ws.WriteMessage(websocket.TextMessage, data)
 }
 
@@ -279,6 +282,7 @@ func (ws *WsConn) Subscribe(subEvent interface{}) error {
 	if err != nil {
 		return err
 	}
+
 	ws.subs = append(ws.subs, subEvent)
 	return nil
 }

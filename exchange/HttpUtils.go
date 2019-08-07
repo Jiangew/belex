@@ -27,7 +27,6 @@ func NewHttpRequest(client *http.Client, reqType string, reqUrl string, postData
 	}
 
 	defer resp.Body.Close()
-
 	bodyData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
@@ -52,6 +51,7 @@ func HttpGet(client *http.Client, reqUrl string) (map[string]interface{}, error)
 		log.Println(string(respData))
 		return nil, err
 	}
+
 	return bodyDataMap, nil
 }
 
@@ -71,6 +71,7 @@ func HttpGet2(client *http.Client, reqUrl string, headers map[string]string) (ma
 		log.Println("respData", string(respData))
 		return nil, err
 	}
+
 	return bodyDataMap, nil
 }
 
@@ -90,6 +91,7 @@ func HttpGet3(client *http.Client, reqUrl string, headers map[string]string) ([]
 		log.Println("respData", string(respData))
 		return nil, err
 	}
+
 	return bodyDataMap, nil
 }
 
@@ -125,8 +127,8 @@ func HttpGet5(client *http.Client, reqUrl string, headers map[string]string) ([]
 }
 
 func HttpPostForm(client *http.Client, reqUrl string, postData url.Values) ([]byte, error) {
-	headers := map[string]string{
-		"Content-Type": "application/x-www-form-urlencoded"}
+	headers := map[string]string{"Content-Type": "application/x-www-form-urlencoded"}
+
 	return NewHttpRequest(client, "POST", reqUrl, postData.Encode(), headers)
 }
 
@@ -135,6 +137,7 @@ func HttpPostForm2(client *http.Client, reqUrl string, postData url.Values, head
 		headers = map[string]string{}
 	}
 	headers["Content-Type"] = "application/x-www-form-urlencoded"
+
 	return NewHttpRequest(client, "POST", reqUrl, postData.Encode(), headers)
 }
 
@@ -148,6 +151,7 @@ func HttpPostForm4(client *http.Client, reqUrl string, postData map[string]strin
 	}
 	headers["Content-Type"] = "application/json"
 	data, _ := json.Marshal(postData)
+
 	return NewHttpRequest(client, "POST", reqUrl, string(data), headers)
 }
 
@@ -156,5 +160,6 @@ func HttpDeleteForm(client *http.Client, reqUrl string, postData url.Values, hea
 		headers = map[string]string{}
 	}
 	headers["Content-Type"] = "application/x-www-form-urlencoded"
+
 	return NewHttpRequest(client, "DELETE", reqUrl, postData.Encode(), headers)
 }

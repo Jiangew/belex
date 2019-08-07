@@ -84,7 +84,6 @@ func (fc *FCoin) doAuthenticatedRequest(method, uri string, params url.Values) (
 		_ = json.Unmarshal(respbody, &respmap)
 	}
 
-	//log.Println(respmap)
 	if exchange.ToInt(respmap["status"]) != 0 {
 		return nil, errors.New(respmap["msg"].(string))
 	}
@@ -100,17 +99,21 @@ func (fc *FCoin) buildSigned(httpmethod string, apiurl string, timestamp int64, 
 	if para != nil {
 		param = para.Encode()
 	}
+
 	if "GET" == httpmethod && param != "" {
 		apiurl += "?" + param
 	}
+
 	signStr := httpmethod + apiurl + fmt.Sprint(timestamp)
 	if "POST" == httpmethod && param != "" {
 		signStr += param
 	}
+
 	signStr2, err := url.QueryUnescape(signStr)
 	if err != nil {
 		signStr2 = signStr
 	}
+
 	sign := base64.StdEncoding.EncodeToString([]byte(signStr2))
 	mac := hmac.New(sha1.New, []byte(fc.secretKey))
 	mac.Write([]byte(sign))
@@ -124,6 +127,7 @@ func NewFCoin(client *http.Client, apikey, secretkey string) *FCoin {
 	fc := &FCoin{baseUrl: "https://api.fcoin.com/v2/", accessKey: apikey, secretKey: secretkey, httpClient: client}
 	_ = fc.setTimeOffset()
 	fc.tradeSymbols, _ = fc.getTradeSymbols()
+
 	return fc
 }
 
@@ -136,11 +140,13 @@ func (fc *FCoin) setTimeOffset() error {
 	if err != nil {
 		return err
 	}
+
 	stime := int64(exchange.ToInt(respmap["data"]))
 	st := time.Unix(stime/1000, 0)
 	lt := time.Now()
 	offset := st.Sub(lt).Seconds()
 	fc.timeoffset = int64(offset)
+
 	return nil
 }
 
@@ -149,17 +155,21 @@ func (fc *FCoin) GetTicker(symbol exchange.Symbol) (*exchange.Ticker, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if respmap["status"].(float64) != 0 {
 		return nil, errors.New(respmap["msg"].(string))
 	}
+
 	tick, ok := respmap["data"].(map[string]interface{})
 	if !ok {
 		return nil, exchange.API_ERR
 	}
+
 	tickmap, ok := tick["ticker"].([]interface{})
 	if !ok {
 		return nil, exchange.API_ERR
 	}
+
 	ticker := new(exchange.Ticker)
 	ticker.Symbol = symbol.ToSymbol("/")
 	ticker.Date = uint64(time.Now().UnixNano() / 1000000)
@@ -181,6 +191,7 @@ func (fc *FCoin) GetDepth(size int, symbol exchange.Symbol) (*exchange.Depth, er
 	if err != nil {
 		return nil, err
 	}
+
 	if respmap["status"].(float64) != 0 {
 		return nil, errors.New(respmap["msg"].(string))
 	}
@@ -222,7 +233,6 @@ func (fc *FCoin) GetDepth(size int, symbol exchange.Symbol) (*exchange.Depth, er
 
 func (fc *FCoin) placeOrder(orderType, orderSide, amount, price string, symbol exchange.Symbol) (*exchange.NewOrder, error) {
 	params := url.Values{}
-
 	params.Set("side", orderSide)
 	params.Set("amount", amount)
 	params.Set("symbol", strings.ToLower(symbol.ToSymbol("")))
@@ -239,11 +249,6 @@ func (fc *FCoin) placeOrder(orderType, orderSide, amount, price string, symbol e
 	if err != nil {
 		return nil, err
 	}
-
-	//side := exchange.SELL
-	//if orderSide == "buy" {
-	//	side = exchange.BUY
-	//}
 
 	return &exchange.NewOrder{
 		ID:        r.(string),
@@ -275,37 +280,15 @@ func (fc *FCoin) MarketSell(amount, price string, symbol exchange.Symbol) (*exch
 func (fc *FCoin) CancelOrder(orderId string, symbol exchange.Symbol) (bool, error) {
 	uri := fmt.Sprintf("orders/%s/submit-cancel", orderId)
 	_, err := fc.doAuthenticatedRequest("POST", uri, url.Values{})
+
 	if err != nil {
 		return false, err
 	}
+
 	return true, nil
 }
 
 func (fc *FCoin) toOrder(o map[string]interface{}, symbol exchange.Symbol) *exchange.NewOrder {
-	//side := exchange.SELL
-	//if o["side"].(string) == "buy" {
-	//	side = exchange.BUY
-	//}
-	//
-	//orderType := exchange.LIMIT
-	//if o["type"].(string) == "market" {
-	//	orderType = exchange.MARKET
-	//}
-	//
-	//orderState := exchange.SUBMITTED
-	//switch o["state"].(string) {
-	//case "partial_filled":
-	//	orderState = exchange.PARTIAL_FILLED
-	//case "filled":
-	//	orderState = exchange.FILLED
-	//case "partial_canceled":
-	//	orderState = exchange.PARTIAL_CANCELED
-	//case "canceled":
-	//	orderState = exchange.CANCELED
-	//case "pending_cancel":
-	//	orderState = exchange.PENDING_CANCEL
-	//}
-
 	var fees float64
 	refund := exchange.ToFloat64(o["fees_income"])
 	fee := exchange.ToFloat64(o["fill_fees"])
@@ -338,10 +321,6 @@ func (fc *FCoin) GetOrder(orderId string, symbol exchange.Symbol) (*exchange.New
 	}
 
 	return fc.toOrder(r.(map[string]interface{}), symbol), nil
-}
-
-func (fc *FCoin) GetOrdersList() {
-	//path := API_URL + fmt.Sprintf(CANCEL_ORDER_API, strings.ToLower(currency.ToSymbol("")))
 }
 
 func (fc *FCoin) GetActiveOrders(symbol exchange.Symbol) ([]exchange.NewOrder, error) {
@@ -408,6 +387,7 @@ func (fc *FCoin) getBeforeTimeOrderHistorys(symbol exchange.Symbol, times time.T
 func (fc *FCoin) GetHoursOrderHistorys(symbol exchange.Symbol, start time.Time, hours int64) ([]exchange.NewOrder, error) {
 	ord1, _ := fc.getAfterTimeOrderHistorys(symbol, start)
 	ord2, _ := fc.getBeforeTimeOrderHistorys(symbol, start.Add(time.Hour*time.Duration(hours)))
+
 	ords := make([]exchange.NewOrder, 0)
 	for _, v1 := range ord1 {
 		for _, v2 := range ord2 {
@@ -423,6 +403,7 @@ func (fc *FCoin) GetHoursOrderHistorys(symbol exchange.Symbol, start time.Time, 
 func (fc *FCoin) GetDaysOrderHistorys(symbol exchange.Symbol, start time.Time, days int64) ([]exchange.NewOrder, error) {
 	ord1, _ := fc.getAfterTimeOrderHistorys(symbol, start)
 	ord2, _ := fc.getBeforeTimeOrderHistorys(symbol, start.Add(time.Hour*24*time.Duration(days)))
+
 	ords := make([]exchange.NewOrder, 0)
 	for _, v1 := range ord1 {
 		for _, v2 := range ord2 {
@@ -431,9 +412,11 @@ func (fc *FCoin) GetDaysOrderHistorys(symbol exchange.Symbol, start time.Time, d
 			}
 		}
 	}
+
 	if len(ords) == 0 && len(ord2) > 1 && len(ord1) > 1 {
 		return nil, errors.New("more than 100 orders")
 	}
+
 	return ords, nil
 }
 
@@ -441,16 +424,14 @@ func (fc *FCoin) GetOrderHistorys(symbol exchange.Symbol, currentPage, pageSize 
 	params := url.Values{}
 	params.Set("symbol", strings.ToLower(symbol.ToSymbol("")))
 	params.Set("states", "partial_canceled,filled")
-	//params.Set("before", "1")
-	//params.Set("after", "0")
 	params.Set("limit", "100")
 
 	r, err := fc.doAuthenticatedRequest("GET", "orders", params)
 	if err != nil {
 		return nil, err
 	}
-	var ords []exchange.NewOrder
 
+	var ords []exchange.NewOrder
 	for _, ord := range r.([]interface{}) {
 		ords = append(ords, *fc.toOrder(ord.(map[string]interface{}), symbol))
 	}
@@ -497,7 +478,6 @@ func (fc *FCoin) GetSubAccount(currency exchange.Currency) (*exchange.SubAccount
 		if strings.ToLower(currency.Name) != vv["currency"].(string) {
 			continue
 		}
-
 		subaccount.Currency = currency.Name
 		subaccount.Available = exchange.ToFloat64(vv["available"])
 		subaccount.Frozen = exchange.ToFloat64(vv["frozen"])
@@ -538,7 +518,7 @@ func (fc *FCoin) GetKlines(symbol exchange.Symbol) ([]exchange.Kline, error) {
 }
 
 func (fc *FCoin) IsOrderable(symbol exchange.Symbol) (bool, error) {
-	respmap, err := exchange.HttpGet(fc.httpClient, fc.baseUrl+fmt.Sprintf("market/candles/M1/%s?limit=10&before=%d", strings.ToLower(symbol.ToSymbol("")), time.Now().Unix()))
+	respmap, err := exchange.HttpGet(fc.httpClient, fc.baseUrl+fmt.Sprintf("market/candles/M1/%s?limit=15&before=%d", strings.ToLower(symbol.ToSymbol("")), time.Now().Unix()))
 	if err != nil {
 		return false, err
 	}
@@ -548,24 +528,35 @@ func (fc *FCoin) IsOrderable(symbol exchange.Symbol) (bool, error) {
 	}
 
 	datamap := respmap["data"].([]interface{})
-	//ranges := make([]string, 0)
+	var high string
+	var low string
 	isOrderable := false
-	var highLow string
+	highEq := false
+	lowEq := false
 	curse := 1
+
 	for _, v := range datamap {
 		vv := v.(map[string]interface{})
-		high := vv["high"].(float64)
-		low := vv["low"].(float64)
-		//ranges = append(ranges, fmt.Sprintf("%.4f", high-low))
+		curHigh := vv["high"].(float64)
+		curLow := vv["low"].(float64)
+
 		if curse == 1 {
-			highLow = fmt.Sprintf("%.4f", high-low)
+			high = fmt.Sprintf("%.4f", curHigh)
+			low = fmt.Sprintf("%.4f", curLow)
 		} else {
-			if highLow == fmt.Sprintf("%.4f", high-low) {
-				isOrderable = true
+			if high == fmt.Sprintf("%.4f", curHigh) {
+				highEq = true
+			}
+			if low == fmt.Sprintf("%.4f", curLow) {
+				lowEq = true
 			}
 		}
 
 		curse++
+	}
+
+	if highEq && lowEq {
+		isOrderable = true
 	}
 
 	return isOrderable, nil
@@ -613,6 +604,7 @@ func (fc *FCoin) GetTradeSymbols(symbol exchange.Symbol) (*TradeSymbol, error) {
 			return nil, err
 		}
 	}
+
 	for k, v := range fc.tradeSymbols {
 		if v.Name == strings.ToLower(symbol.ToSymbol("")) {
 			return &fc.tradeSymbols[k], nil
