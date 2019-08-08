@@ -68,7 +68,7 @@ func main() {
 		if err != nil {
 			log.Println("usdt account got error:", err)
 		} else {
-			if usdtAccount.Available > 500 {
+			if usdtAccount.Available > 200 {
 				if (lastBuyMaxPrice > 0 && buyPrice > lastBuyMaxPrice) || (lastBuyMinPrice > 0 && buyPrice < lastBuyMinPrice) {
 					log.Println("limit buy exceeded limit price:", buyPrice)
 				} else {
@@ -96,7 +96,7 @@ func main() {
 		if err != nil {
 			log.Println("pax account got error:", err)
 		} else {
-			if paxAccount.Available > 500 {
+			if paxAccount.Available > 200 {
 				if (lastSellMaxPrice > 0 && sellPrice > lastSellMaxPrice) || (lastSellMinPrice > 0 && sellPrice < lastSellMinPrice) {
 					log.Println("limit sell exceeded limit price:", sellPrice)
 				} else {
@@ -120,6 +120,6 @@ func main() {
 			}
 		}
 
-		time.Sleep(200 * time.Millisecond)
+		time.Sleep(300 * time.Millisecond)
 	}
 }
