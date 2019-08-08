@@ -20,10 +20,10 @@ func main() {
 	apiBuilder := fcoin.NewAPIBuilder().HttpTimeout(5 * time.Second)
 	api := apiBuilder.APIKey("1412ac27e3f741c796f7c4600069d9f1").APISecretkey("4843754749be46919d986142917f06d7").Build(exchange.FCOIN)
 
-	orders, _ := api.GetActiveOrders(exchange.PAX_USDT)
+	orders, _ := api.GetActiveOrders(exchange.GUSD_USDT)
 	if len(orders) > 0 {
 		for _, order := range orders {
-			cancel, _ := api.CancelOrder(order.ID, exchange.PAX_USDT)
+			cancel, _ := api.CancelOrder(order.ID, exchange.GUSD_USDT)
 			log.Println("cancel order:", order.ID, "ret:", cancel)
 		}
 	}
@@ -36,7 +36,7 @@ func main() {
 	lastSellMaxPrice := float64(0)
 
 	for {
-		taker, err := api.GetTicker(exchange.PAX_USDT)
+		taker, err := api.GetTicker(exchange.GUSD_USDT)
 		if err != nil {
 			log.Println("usdt account got error:", err)
 			continue
@@ -47,17 +47,17 @@ func main() {
 			log.Println("ask price:", sellPrice)
 		}
 
-		orders, _ := api.GetActiveOrders(exchange.PAX_USDT)
+		orders, _ := api.GetActiveOrders(exchange.GUSD_USDT)
 		if len(orders) > 0 {
 			for _, order := range orders {
 				if order.Side == "buy" {
 					if order.Price != buyPrice {
-						cancel, _ := api.CancelOrder(order.ID, exchange.PAX_USDT)
+						cancel, _ := api.CancelOrder(order.ID, exchange.GUSD_USDT)
 						log.Println("cancel buy:", order.ID, "ret:", cancel)
 					}
 				} else if order.Side == "sell" {
 					if order.Price != sellPrice {
-						cancel, _ := api.CancelOrder(order.ID, exchange.PAX_USDT)
+						cancel, _ := api.CancelOrder(order.ID, exchange.GUSD_USDT)
 						log.Println("cancel sell:", order.ID, "ret:", cancel)
 					}
 				}
@@ -72,11 +72,11 @@ func main() {
 				if (lastBuyMaxPrice > 0 && buyPrice > lastBuyMaxPrice) || (lastBuyMinPrice > 0 && buyPrice < lastBuyMinPrice) {
 					log.Println("limit buy exceeded limit price:", buyPrice)
 				} else {
-					isOrderable, _ := api.IsOrderable(exchange.PAX_USDT)
+					isOrderable, _ := api.IsOrderable(exchange.GUSD_USDT)
 					if isOrderable {
 						amount := (usdtAccount.Available - 1) / buyPrice
 						if amount > 1 {
-							buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", buyPrice), exchange.PAX_USDT)
+							buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", buyPrice), exchange.GUSD_USDT)
 							if err != nil {
 								log.Println("limit buy amount:", amount, "price:", buyPrice, "error:", err)
 							} else {
@@ -92,7 +92,7 @@ func main() {
 			}
 		}
 
-		paxAccount, err := api.GetSubAccount(exchange.PAX)
+		paxAccount, err := api.GetSubAccount(exchange.GUSD)
 		if err != nil {
 			log.Println("pax account got error:", err)
 		} else {
@@ -100,11 +100,11 @@ func main() {
 				if (lastSellMaxPrice > 0 && sellPrice > lastSellMaxPrice) || (lastSellMinPrice > 0 && sellPrice < lastSellMinPrice) {
 					log.Println("limit sell exceeded limit price:", sellPrice)
 				} else {
-					isOrderable, _ := api.IsOrderable(exchange.PAX_USDT)
+					isOrderable, _ := api.IsOrderable(exchange.GUSD_USDT)
 					if isOrderable {
 						amount := paxAccount.Available - 1
 						if amount > 1 {
-							sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", sellPrice), exchange.PAX_USDT)
+							sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", sellPrice), exchange.GUSD_USDT)
 							if err != nil {
 								log.Println("limit sell amount:", amount, "price:", sellPrice, "error:", err)
 							} else {
@@ -119,23 +119,6 @@ func main() {
 				}
 			}
 		}
-
-		//paxAccount, err := api.GetSubAccount(exchange.PAX)
-		//if err != nil {
-		//	log.Println("pax account got error:", err)
-		//} else {
-		//	if paxAccount.Available > 10 {
-		//		amount := paxAccount.Available - 1
-		//		if amount > 1 {
-		//			sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", sellPrice), exchange.PAX_USDT)
-		//			if err != nil {
-		//				log.Println("limit sell amount:", amount, "price:", sellPrice, "error:", err)
-		//			} else {
-		//				log.Println("limit sell amount:", amount, "price:", sellPrice, "success:", sellOrder.ID)
-		//			}
-		//		}
-		//	}
-		//}
 
 		time.Sleep(200 * time.Millisecond)
 	}

@@ -26,6 +26,8 @@ var (
 	USDT = Currency{"USDT", ""}
 	PAX  = Currency{"PAX", ""}
 	TUSD = Currency{"TUSD", ""}
+	USDC = Currency{"USDC", ""}
+	GUSD = Currency{"GUSD", ""}
 	BTC  = Currency{"BTC", ""}
 	BCH  = Currency{"BCH", ""}
 	BSV  = Currency{"BSV", ""}
@@ -39,6 +41,8 @@ var (
 
 	PAX_USDT  = Symbol{PAX, USDT}
 	TUSD_USDT = Symbol{TUSD, USDT}
+	USDC_USDT = Symbol{USDC, USDT}
+	GUSD_USDT = Symbol{GUSD, USDT}
 	BTC_USDT  = Symbol{BTC, USDT}
 	BCH_USDT  = Symbol{BCH, USDT}
 	BSV_USDT  = Symbol{BSV, USDT}
@@ -69,6 +73,10 @@ func NewCurrency(name, desc string) Currency {
 		return PAX
 	case "tusd", "TUSD":
 		return TUSD
+	case "usdc", "USDC":
+		return USDC
+	case "gusd", "GUSD":
+		return GUSD
 	case "btc", "BTC":
 		return BTC
 	case "bch", "BCH":
