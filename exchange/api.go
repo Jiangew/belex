@@ -1,6 +1,7 @@
 package exchange
 
 type API interface {
+
 	GetExchangeName() string
 
 	GetAccount() (*Account, error)
@@ -8,7 +9,6 @@ type API interface {
 
 	LimitBuy(amount, price string, symbol Symbol) (*NewOrder, error)
 	LimitSell(amount, price string, symbol Symbol) (*NewOrder, error)
-
 	MarketBuy(amount, price string, symbol Symbol) (*NewOrder, error)
 	MarketSell(amount, price string, symbol Symbol) (*NewOrder, error)
 
@@ -20,9 +20,9 @@ type API interface {
 
 	GetTicker(symbol Symbol) (*Ticker, error)
 	GetDepth(size int, symbol Symbol) (*Depth, error)
-
 	GetKlines(symbol Symbol) ([]Kline, error)
 	IsOrderable(symbol Symbol) (bool, error)
 
 	GetTrades(symbol Symbol, since int64) ([]Trade, error)
+
 }

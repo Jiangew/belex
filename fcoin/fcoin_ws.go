@@ -53,6 +53,7 @@ var _INERNAL_KLINE_PERIOD_CONVERTER = map[int]string{
 	exchange.KLINE_PERIOD_1WEEK:  "W1",
 	exchange.KLINE_PERIOD_1MONTH: "MN",
 }
+
 var _INERNAL_KLINE_PERIOD_REVERTER = map[string]int{
 	"M1":  exchange.KLINE_PERIOD_1MIN,
 	"M3":  exchange.KLINE_PERIOD_3MIN,
@@ -81,16 +82,13 @@ func NewFCoinWs(client *http.Client, apikey, secretkey string) *FCoinWs {
 				"cmd":  "ping",
 				"id":   fcWs.clientId,
 				"args": args}
-
 		}, 25*time.Second).
 		ReconnectIntervalTime(24 * time.Hour).
 		UnCompressFunc(exchange.FlateUnCompress).
 		ProtoHandleFunc(fcWs.handle)
 
 	fc := NewFCoin(client, apikey, secretkey)
-
 	fcWs.tradeSymbols = fc.tradeSymbols
-
 	if len(fcWs.tradeSymbols) == 0 {
 		panic("trade symbol is empty, pls check connection...")
 	}

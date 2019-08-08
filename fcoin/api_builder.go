@@ -168,7 +168,6 @@ func (builder *APIBuilder) Build(exName string) (api exchange.API) {
 		_api = NewFCoin(builder.client, builder.apiKey, builder.secretkey)
 	default:
 		println("exchange name error [" + exName + "].")
-
 	}
 
 	return _api

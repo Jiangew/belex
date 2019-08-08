@@ -74,6 +74,7 @@ func (b *WsBuilder) Heartbeat(data []byte, t time.Duration) *WsBuilder {
 	b.wsConfig.HeartbeatData = data
 	return b
 }
+
 func (b *WsBuilder) Heartbeat2(heartbeat func() interface{}, t time.Duration) *WsBuilder {
 	b.wsConfig.HeartbeatIntervalTime = t
 	b.wsConfig.HeartbeatFunc = heartbeat
@@ -289,10 +290,8 @@ func (ws *WsConn) Subscribe(subEvent interface{}) error {
 
 func (ws *WsConn) ReceiveMessage() {
 	ws.clearChannel(ws.closeRecv)
-
 	go func() {
 		for {
-
 			if len(ws.closeRecv) > 0 {
 				<-ws.closeRecv
 				log.Println("close websocket , exiting receive message goroutine.")

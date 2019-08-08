@@ -1,7 +1,6 @@
 package exchange
 
 import (
-	"net/http"
 	"time"
 )
 
@@ -97,17 +96,6 @@ type Depth struct {
 	UTime   time.Time
 	AskList DepthRecords //Descending order
 	BidList DepthRecords //Descending order
-}
-
-type APIConfig struct {
-	HttpClient    *http.Client
-	Endpoint      string
-	ApiKey        string
-	ApiSecretKey  string
-	ApiPassphrase string //for okex.com v3 api
-	ClientId      string //for bitstamp.net, huobi.pro
-
-	Lever int //杠杆倍数
 }
 
 type Kline struct {
