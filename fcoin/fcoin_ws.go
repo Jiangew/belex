@@ -195,13 +195,12 @@ func (fcWs *FCoinWs) connectWs() {
 
 func (fcWs *FCoinWs) parseTickerData(tickmap []interface{}) *exchange.Ticker {
 	t := new(exchange.Ticker)
-	t.Date = uint64(time.Now().UnixNano() / 1000000)
 	t.Last = exchange.ToFloat64(tickmap[0])
-	t.Vol = exchange.ToFloat64(tickmap[9])
-	t.Low = exchange.ToFloat64(tickmap[8])
-	t.High = exchange.ToFloat64(tickmap[7])
 	t.Buy = exchange.ToFloat64(tickmap[2])
 	t.Sell = exchange.ToFloat64(tickmap[4])
+	t.High = exchange.ToFloat64(tickmap[7])
+	t.Low = exchange.ToFloat64(tickmap[8])
+	t.BaseVol = exchange.ToFloat64(tickmap[9])
 
 	return t
 }
@@ -227,9 +226,9 @@ func (fcWs *FCoinWs) parseDepthData(bids, asks []interface{}) *exchange.Depth {
 
 func (fcWs *FCoinWs) parseKlineData(tickmap []interface{}) *exchange.Ticker {
 	t := new(exchange.Ticker)
-	t.Date = uint64(time.Now().UnixNano() / 1000000)
+
 	t.Last = exchange.ToFloat64(tickmap[0])
-	t.Vol = exchange.ToFloat64(tickmap[9])
+	t.BaseVol = exchange.ToFloat64(tickmap[9])
 	t.Low = exchange.ToFloat64(tickmap[8])
 	t.High = exchange.ToFloat64(tickmap[7])
 	t.Buy = exchange.ToFloat64(tickmap[2])

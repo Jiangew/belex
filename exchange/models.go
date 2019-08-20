@@ -60,16 +60,15 @@ type Account struct {
 
 type Ticker struct {
 	Symbol  string  `json:"symbol"`
-	Date    uint64  `json:"date"`
-	Last    float64 `json:"last,string"`
-	LastVol float64 `json:"last_vol,string"`
-	Buy     float64 `json:"buy,string"`
-	BuyVol  float64 `json:"buy_vol,string"`
-	Sell    float64 `json:"sell,string"`
-	SellVol float64 `json:"sell_vol,string"`
-	High    float64 `json:"high,string"`
-	Low     float64 `json:"low,string"`
-	Vol     float64 `json:"vol,string"`
+	Last    float64 `json:"last,string"`     //最新成交价
+	LastVol float64 `json:"last_vol,string"` //最近一笔成交的成交量
+	Buy     float64 `json:"buy,string"`      //最大买一价
+	BuyVol  float64 `json:"buy_vol,string"`  //最大买一量
+	Sell    float64 `json:"sell,string"`     //最小卖一价
+	SellVol float64 `json:"sell_vol,string"` //最小卖一量
+	High    float64 `json:"high,string"`     //24小时内最高价
+	Low     float64 `json:"low,string"`      //24小时内最低价
+	BaseVol float64 `json:"base_vol,string"` //24小时内基准货币成交量
 }
 
 type DepthRecord struct {

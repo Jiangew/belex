@@ -171,8 +171,7 @@ func (fc *FCoin) GetTicker(symbol exchange.Symbol) (*exchange.Ticker, error) {
 	}
 
 	ticker := new(exchange.Ticker)
-	ticker.Symbol = symbol.ToSymbol("/")
-	ticker.Date = uint64(time.Now().UnixNano() / 1000000)
+	ticker.Symbol = symbol.ToSymbol("")
 	ticker.Last = exchange.ToFloat64(tickmap[0])
 	ticker.LastVol = exchange.ToFloat64(tickmap[1])
 	ticker.Buy = exchange.ToFloat64(tickmap[2])
@@ -181,7 +180,7 @@ func (fc *FCoin) GetTicker(symbol exchange.Symbol) (*exchange.Ticker, error) {
 	ticker.SellVol = exchange.ToFloat64(tickmap[5])
 	ticker.High = exchange.ToFloat64(tickmap[7])
 	ticker.Low = exchange.ToFloat64(tickmap[8])
-	ticker.Vol = exchange.ToFloat64(tickmap[9])
+	ticker.BaseVol = exchange.ToFloat64(tickmap[9])
 
 	return ticker, nil
 }
