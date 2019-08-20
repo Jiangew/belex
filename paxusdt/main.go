@@ -27,6 +27,11 @@ func main() {
 	u.Timeout = 60
 	updates, err := bot.GetUpdatesChan(u)
 
+	buyPrice := float64(0)
+	maxBuyPrice := float64(0)
+	sellPrice := float64(0)
+	minSellPrice := float64(0)
+
 	go func() {
 		for update := range updates {
 			if update.Message == nil {
@@ -82,6 +87,21 @@ func main() {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgBody)
 				msg.ReplyToMessageID = update.Message.MessageID
 				_, _ = bot.Send(msg)
+			case "start":
+				maxBuyPrice = float64(0)
+				minSellPrice = float64(0)
+
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "max buy and min sell order limit in memory has been cleared.")
+				msg.ReplyToMessageID = update.Message.MessageID
+				_, _ = bot.Send(msg)
+			case "stop":
+				taker, _ := api.GetTicker(exchange.PAX_USDT)
+				maxBuyPrice = taker.Buy / 2
+				minSellPrice = taker.Sell * 2
+
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "max buy and min sell order limit in memory has been set.")
+				msg.ReplyToMessageID = update.Message.MessageID
+				_, _ = bot.Send(msg)
 			}
 		}
 	}()
@@ -93,11 +113,6 @@ func main() {
 			log.Println("cancel order:", order.ID, "ret:", cancel)
 		}
 	}
-
-	buyPrice := float64(0)
-	maxBuyPrice := float64(0)
-	sellPrice := float64(0)
-	minSellPrice := float64(0)
 
 	for {
 		taker, err := api.GetTicker(exchange.PAX_USDT)

@@ -517,7 +517,7 @@ func (fc *FCoin) GetKlines(symbol exchange.Symbol) ([]exchange.Kline, error) {
 }
 
 func (fc *FCoin) IsOrderable(symbol exchange.Symbol) (bool, error) {
-	respmap, err := exchange.HttpGet(fc.httpClient, fc.baseUrl+fmt.Sprintf("market/candles/M5/%s?limit=6&before=%d", strings.ToLower(symbol.ToSymbol("")), time.Now().Unix()))
+	respmap, err := exchange.HttpGet(fc.httpClient, fc.baseUrl+fmt.Sprintf("market/candles/M1/%s?limit=10&before=%d", strings.ToLower(symbol.ToSymbol("")), time.Now().Unix()))
 	if err != nil {
 		return false, err
 	}
