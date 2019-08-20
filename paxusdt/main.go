@@ -55,7 +55,7 @@ func main() {
 			case "t":
 				taker, _ := api.GetTicker(exchange.PAX_USDT)
 				takerBytes, _ := json.Marshal(taker)
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("taker: %s", string(takerBytes)))
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, string(takerBytes))
 				msg.ReplyToMessageID = update.Message.MessageID
 				_, _ = bot.Send(msg)
 			}
