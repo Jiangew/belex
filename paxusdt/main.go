@@ -55,7 +55,31 @@ func main() {
 			case "t":
 				taker, _ := api.GetTicker(exchange.PAX_USDT)
 				takerBytes, _ := json.Marshal(taker)
+
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, string(takerBytes))
+				msg.ReplyToMessageID = update.Message.MessageID
+				_, _ = bot.Send(msg)
+			case "o":
+				orders, _ := api.GetActiveOrders(exchange.PAX_USDT)
+				buyCount := 0
+				sellCount := 0
+				if len(orders) > 0 {
+					for _, order := range orders {
+						if order.Side == "buy" {
+							buyCount++
+						} else if order.Side == "sell" {
+							sellCount++
+						}
+					}
+				}
+
+				msgBody := ""
+				if len(orders) > 0 {
+					msgBody = fmt.Sprintf("orderCount: %d, buyCount: %d, sellCount: %d", len(orders), buyCount, sellCount)
+				} else {
+					msgBody = "there is no active orders."
+				}
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgBody)
 				msg.ReplyToMessageID = update.Message.MessageID
 				_, _ = bot.Send(msg)
 			}
