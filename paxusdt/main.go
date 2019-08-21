@@ -49,12 +49,13 @@ func main() {
 				balance := decimal.NewFromFloat(usdtAccount.Balance).Add(currencyToUsdt)
 				balanceOut, _ := strconv.ParseFloat(balance.String(), 64)
 
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("usdt: %s, usdtFrozen: %s, currency: %s, currencyFrozen: %s, balance: %s",
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("balance: %s, usdt: %s, usdtFrozen: %s, currency: %s, currencyFrozen: %s",
+					fmt.Sprintf("%.4f", balanceOut),
 					fmt.Sprintf("%.4f", usdtAccount.Available),
 					fmt.Sprintf("%.4f", usdtAccount.Frozen),
 					fmt.Sprintf("%.4f", currencyAccount.Available),
 					fmt.Sprintf("%.4f", currencyAccount.Frozen),
-					fmt.Sprintf("%.4f", balanceOut)))
+				))
 				msg.ReplyToMessageID = update.Message.MessageID
 				_, _ = bot.Send(msg)
 			case "t":
@@ -80,7 +81,7 @@ func main() {
 
 				msgBody := ""
 				if len(orders) > 0 {
-					msgBody = fmt.Sprintf("orderCount: %d, buyCount: %d, sellCount: %d", len(orders), buyCount, sellCount)
+					msgBody = fmt.Sprintf("buyCount: %d, sellCount: %d", buyCount, sellCount)
 				} else {
 					msgBody = "there is no active orders."
 				}
@@ -91,7 +92,7 @@ func main() {
 				maxBuyPrice = float64(0)
 				minSellPrice = float64(0)
 
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "max buy and min sell order limit in memory has been cleared.")
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "max buy and min sell limit price in memory has been cleared.")
 				msg.ReplyToMessageID = update.Message.MessageID
 				_, _ = bot.Send(msg)
 			case "stop":
@@ -99,7 +100,7 @@ func main() {
 				maxBuyPrice = taker.Buy / 2
 				minSellPrice = taker.Sell * 2
 
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "max buy and min sell order limit in memory has been set.")
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "max buy and min sell limit price in memory has been set.")
 				msg.ReplyToMessageID = update.Message.MessageID
 				_, _ = bot.Send(msg)
 			}
