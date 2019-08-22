@@ -32,80 +32,7 @@ func main() {
 	sellPrice := float64(0)
 	minSellPrice := float64(0)
 
-	go func() {
-		for update := range updates {
-			if update.Message == nil {
-				continue
-			}
-			//log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-
-			switch update.Message.Text {
-			case "b":
-				usdtAccount, _ := api.GetSubAccount(exchange.USDT)
-				currencyAccount, _ := api.GetSubAccount(exchange.PAX)
-				taker, _ := api.GetTicker(exchange.PAX_USDT)
-
-				currencyToUsdt := decimal.NewFromFloat(currencyAccount.Balance).Mul(decimal.NewFromFloat(taker.Sell))
-				balance := decimal.NewFromFloat(usdtAccount.Balance).Add(currencyToUsdt)
-				balanceOut, _ := strconv.ParseFloat(balance.String(), 64)
-
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("balance: %s, usdt: %s, usdtFrozen: %s, currency: %s, currencyFrozen: %s",
-					fmt.Sprintf("%.4f", balanceOut),
-					fmt.Sprintf("%.4f", usdtAccount.Available),
-					fmt.Sprintf("%.4f", usdtAccount.Frozen),
-					fmt.Sprintf("%.4f", currencyAccount.Available),
-					fmt.Sprintf("%.4f", currencyAccount.Frozen),
-				))
-				msg.ReplyToMessageID = update.Message.MessageID
-				_, _ = bot.Send(msg)
-			case "t":
-				taker, _ := api.GetTicker(exchange.PAX_USDT)
-				takerBytes, _ := json.Marshal(taker)
-
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, string(takerBytes))
-				msg.ReplyToMessageID = update.Message.MessageID
-				_, _ = bot.Send(msg)
-			case "o":
-				orders, _ := api.GetActiveOrders(exchange.PAX_USDT)
-				buyCount := 0
-				sellCount := 0
-				if len(orders) > 0 {
-					for _, order := range orders {
-						if order.Side == "buy" {
-							buyCount++
-						} else if order.Side == "sell" {
-							sellCount++
-						}
-					}
-				}
-
-				msgBody := ""
-				if len(orders) > 0 {
-					msgBody = fmt.Sprintf("buyCount: %d, sellCount: %d", buyCount, sellCount)
-				} else {
-					msgBody = "there is no active orders."
-				}
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgBody)
-				msg.ReplyToMessageID = update.Message.MessageID
-				_, _ = bot.Send(msg)
-			case "start":
-				maxBuyPrice = float64(0)
-				minSellPrice = float64(0)
-
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "max buy and min sell limit price in memory has been cleared.")
-				msg.ReplyToMessageID = update.Message.MessageID
-				_, _ = bot.Send(msg)
-			case "stop":
-				taker, _ := api.GetTicker(exchange.PAX_USDT)
-				maxBuyPrice = taker.Buy / 2
-				minSellPrice = taker.Sell * 2
-
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "max buy and min sell limit price in memory has been set.")
-				msg.ReplyToMessageID = update.Message.MessageID
-				_, _ = bot.Send(msg)
-			}
-		}
-	}()
+	go sendMessage(api, bot, updates, maxBuyPrice, minSellPrice)
 
 	orders, _ := api.GetActiveOrders(exchange.PAX_USDT)
 	if len(orders) > 0 {
@@ -199,5 +126,80 @@ func main() {
 		}
 
 		time.Sleep(250 * time.Millisecond)
+	}
+}
+
+func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChannel, maxBuyPrice float64, minSellPrice float64) {
+	for update := range updates {
+		if update.Message == nil {
+			continue
+		}
+		//log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+
+		switch update.Message.Text {
+		case "b":
+			usdtAccount, _ := api.GetSubAccount(exchange.USDT)
+			currencyAccount, _ := api.GetSubAccount(exchange.PAX)
+			taker, _ := api.GetTicker(exchange.PAX_USDT)
+
+			currencyToUsdt := decimal.NewFromFloat(currencyAccount.Balance).Mul(decimal.NewFromFloat(taker.Sell))
+			balance := decimal.NewFromFloat(usdtAccount.Balance).Add(currencyToUsdt)
+			balanceOut, _ := strconv.ParseFloat(balance.String(), 64)
+
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("balance: %s, usdt: %s, usdtFrozen: %s, currency: %s, currencyFrozen: %s",
+				fmt.Sprintf("%.4f", balanceOut),
+				fmt.Sprintf("%.4f", usdtAccount.Available),
+				fmt.Sprintf("%.4f", usdtAccount.Frozen),
+				fmt.Sprintf("%.4f", currencyAccount.Available),
+				fmt.Sprintf("%.4f", currencyAccount.Frozen),
+			))
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
+		case "t":
+			taker, _ := api.GetTicker(exchange.PAX_USDT)
+			takerBytes, _ := json.Marshal(taker)
+
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, string(takerBytes))
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
+		case "o":
+			orders, _ := api.GetActiveOrders(exchange.PAX_USDT)
+			buyCount := 0
+			sellCount := 0
+			if len(orders) > 0 {
+				for _, order := range orders {
+					if order.Side == "buy" {
+						buyCount++
+					} else if order.Side == "sell" {
+						sellCount++
+					}
+				}
+			}
+
+			msgBody := ""
+			if len(orders) > 0 {
+				msgBody = fmt.Sprintf("buyCount: %d, sellCount: %d", buyCount, sellCount)
+			} else {
+				msgBody = "there is no active orders."
+			}
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgBody)
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
+		case "start":
+			maxBuyPrice = float64(0)
+			minSellPrice = float64(0)
+
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "max buy and min sell limit price in memory has been cleared.")
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
+		case "stop":
+			taker, _ := api.GetTicker(exchange.PAX_USDT)
+			maxBuyPrice = taker.Buy / 2
+			minSellPrice = taker.Sell * 2
+
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "max buy and min sell limit price in memory has been set.")
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
+		}
 	}
 }
