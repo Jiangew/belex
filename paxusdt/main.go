@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/jiangew/belex/exchange"
@@ -88,7 +87,8 @@ func main() {
 								log.Println("limit buy amount:", amount, "price:", buyPrice, "error:", err)
 							} else {
 								log.Println("limit buy amount:", amount, "price:", buyPrice, "success:", buyOrder.ID)
-								maxBuyPrice = buyPrice * 10005 / 10000
+								maxBuyPrice = buyPrice * 10003 / 10000
+								minSellPrice = buyPrice * 9997 / 10000
 							}
 						}
 					} else {
@@ -115,7 +115,8 @@ func main() {
 								log.Println("limit sell amount:", amount, "price:", sellPrice, "error:", err)
 							} else {
 								log.Println("limit sell amount:", amount, "price:", sellPrice, "success:", sellOrder.ID)
-								minSellPrice = sellPrice * 9995 / 10000
+								minSellPrice = sellPrice * 9997 / 10000
+								maxBuyPrice = sellPrice * 10003 / 10000
 							}
 						}
 					} else {
@@ -141,7 +142,6 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 			usdtAccount, _ := api.GetSubAccount(exchange.USDT)
 			currencyAccount, _ := api.GetSubAccount(exchange.PAX)
 			taker, _ := api.GetTicker(exchange.PAX_USDT)
-
 			currencyToUsdt := decimal.NewFromFloat(currencyAccount.Balance).Mul(decimal.NewFromFloat(taker.Sell))
 			balance := decimal.NewFromFloat(usdtAccount.Balance).Add(currencyToUsdt)
 			balanceOut, _ := strconv.ParseFloat(balance.String(), 64)
@@ -157,9 +157,19 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 			_, _ = bot.Send(msg)
 		case "t":
 			taker, _ := api.GetTicker(exchange.PAX_USDT)
-			takerBytes, _ := json.Marshal(taker)
-
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, string(takerBytes))
+			//takerBytes, _ := json.Marshal(taker)
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("symbol: %s, last: %s, lastVol: %s, buy: %s, buyVol: %s, sell: %s, sellVol: %s, high: %s, low: %s, baseVol: %s",
+				taker.Symbol,
+				fmt.Sprintf("%.4f", taker.Last),
+				fmt.Sprintf("%.4f", taker.LastVol),
+				fmt.Sprintf("%.4f", taker.Buy),
+				fmt.Sprintf("%.4f", taker.BuyVol),
+				fmt.Sprintf("%.4f", taker.Sell),
+				fmt.Sprintf("%.4f", taker.SellVol),
+				fmt.Sprintf("%.4f", taker.High),
+				fmt.Sprintf("%.4f", taker.Low),
+				fmt.Sprintf("%.4f", taker.BaseVol),
+			))
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
 		case "o":
@@ -175,7 +185,6 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 					}
 				}
 			}
-
 			msgBody := ""
 			if len(orders) > 0 {
 				msgBody = fmt.Sprintf("buyCount: %d, sellCount: %d", buyCount, sellCount)
@@ -188,7 +197,6 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 		case "start":
 			maxBuyPrice = float64(0)
 			minSellPrice = float64(0)
-
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "max buy and min sell limit price in memory has been cleared.")
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
@@ -196,7 +204,6 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 			taker, _ := api.GetTicker(exchange.PAX_USDT)
 			maxBuyPrice = taker.Buy / 2
 			minSellPrice = taker.Sell * 2
-
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "max buy and min sell limit price in memory has been set.")
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
