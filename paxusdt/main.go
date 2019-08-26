@@ -13,12 +13,35 @@ import (
 
 //var wg sync.WaitGroup
 
-func main() {
-	//apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second).HttpProxy("socks5://127.0.0.1:1086")
-	apiBuilder := fcoin.NewAPIBuilder().HttpTimeout(5 * time.Second)
-	api := apiBuilder.APIKey("1412ac27e3f741c796f7c4600069d9f1").APISecretkey("4843754749be46919d986142917f06d7").Build(exchange.FCOIN)
+const (
+	proxy  = "socks5://127.0.0.1:1086"
+	key    = "1412ac27e3f741c796f7c4600069d9f1"
+	secret = "4843754749be46919d986142917f06d7"
+	bot    = "960133387:AAGZ3dZ1FPO-lVJmVTUYsMxDZFUR5WDEEc0"
+)
 
-	bot, err := tgbotapi.NewBotAPI("960133387:AAGZ3dZ1FPO-lVJmVTUYsMxDZFUR5WDEEc0")
+var (
+	symbol        = exchange.PAX_USDT
+	baseCurrency  = exchange.USDT
+	quoteCurrency = exchange.PAX
+
+	upRise   = float64(10003 / 10000)
+	downRise = float64(9997 / 10000)
+
+	curBuyPrice   = float64(0)
+	curSellPrice  = float64(0)
+	lastBuyPrice  = float64(0)
+	lastSellPrice = float64(0)
+	maxBuyPrice   = float64(0)
+	minSellPrice  = float64(0)
+)
+
+func main() {
+	//apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second).HttpProxy(proxy)
+	apiBuilder := fcoin.NewAPIBuilder().HttpTimeout(5 * time.Second)
+	api := apiBuilder.APIKey(key).APISecretkey(secret).Build(exchange.FCOIN)
+
+	bot, err := tgbotapi.NewBotAPI(bot)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -26,69 +49,68 @@ func main() {
 	u.Timeout = 60
 	updates, err := bot.GetUpdatesChan(u)
 
-	buyPrice := float64(0)
-	maxBuyPrice := float64(0)
-	sellPrice := float64(0)
-	minSellPrice := float64(0)
+	// async send telegram message
+	go sendMessage(api, bot, updates)
 
-	go sendMessage(api, bot, updates, maxBuyPrice, minSellPrice)
-
-	orders, _ := api.GetActiveOrders(exchange.PAX_USDT)
+	// cancel orders when start
+	orders, _ := api.GetActiveOrders(symbol)
 	if len(orders) > 0 {
 		for _, order := range orders {
-			cancel, _ := api.CancelOrder(order.ID, exchange.PAX_USDT)
-			log.Println("cancel order:", order.ID, "ret:", cancel)
+			cancel, _ := api.CancelOrder(order.ID, symbol)
+			log.Println("cancel order when start:", order.ID, "ret:", cancel)
 		}
 	}
 
+	// main quant
 	for {
-		taker, err := api.GetTicker(exchange.PAX_USDT)
+		taker, err := api.GetTicker(symbol)
 		if err != nil {
 			log.Println("usdt account got error:", err)
 			continue
 		} else {
-			buyPrice = taker.Buy
-			sellPrice = taker.Sell
-			log.Println("bid price:", buyPrice)
-			log.Println("ask price:", sellPrice)
+			curBuyPrice = taker.Buy
+			curSellPrice = taker.Sell
+			log.Println("bid price:", curBuyPrice)
+			log.Println("ask price:", curSellPrice)
 		}
 
-		orders, _ := api.GetActiveOrders(exchange.PAX_USDT)
+		orders, _ := api.GetActiveOrders(symbol)
 		if len(orders) > 0 {
 			for _, order := range orders {
 				if order.Side == "buy" {
-					if order.Price != buyPrice {
-						cancel, _ := api.CancelOrder(order.ID, exchange.PAX_USDT)
+					if order.Price != curBuyPrice {
+						cancel, _ := api.CancelOrder(order.ID, symbol)
 						log.Println("cancel buy:", order.ID, "ret:", cancel)
 					}
 				} else if order.Side == "sell" {
-					if order.Price != sellPrice {
-						cancel, _ := api.CancelOrder(order.ID, exchange.PAX_USDT)
+					if order.Price != curSellPrice {
+						cancel, _ := api.CancelOrder(order.ID, symbol)
 						log.Println("cancel sell:", order.ID, "ret:", cancel)
 					}
 				}
 			}
 		}
 
-		usdtAccount, err := api.GetSubAccount(exchange.USDT)
+		usdtAccount, err := api.GetSubAccount(baseCurrency)
 		if err != nil {
 			log.Println("usdt account got error:", err)
 		} else {
 			if usdtAccount.Available > 300 {
-				if (maxBuyPrice > 0 && buyPrice > maxBuyPrice) {
-					log.Println("limit buy exceeded limit price:", buyPrice)
+				if (maxBuyPrice > 0 && curBuyPrice > maxBuyPrice) {
+					log.Println("limit buy exceeded limit price:", curBuyPrice)
 				} else {
-					isOrderable, _ := api.IsOrderable(exchange.PAX_USDT)
+					isOrderable, _ := api.IsOrderable(symbol)
 					if isOrderable {
-						amount := (usdtAccount.Available - 1) / buyPrice
+						amount := (usdtAccount.Available - 1) / curBuyPrice
 						if amount > 1 {
-							buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", buyPrice), exchange.PAX_USDT)
+							buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", curBuyPrice), symbol)
 							if err != nil {
-								log.Println("limit buy amount:", amount, "price:", buyPrice, "error:", err)
+								log.Println("limit buy amount:", amount, "price:", curBuyPrice, "error:", err)
 							} else {
-								log.Println("limit buy amount:", amount, "price:", buyPrice, "success:", buyOrder.ID)
-								maxBuyPrice = buyPrice * 10003 / 10000
-								minSellPrice = buyPrice * 9997 / 10000
+								log.Println("limit buy amount:", amount, "price:", curBuyPrice, "success:", buyOrder.ID)
+								lastBuyPrice = curBuyPrice
+								maxBuyPrice = curBuyPrice * upRise
+								minSellPrice = curBuyPrice * downRise
 							}
 						}
 					} else {
@@ -98,25 +120,26 @@ func main() {
 			}
 		}
 
-		currencyAccount, err := api.GetSubAccount(exchange.PAX)
+		currencyAccount, err := api.GetSubAccount(quoteCurrency)
 		if err != nil {
-			log.Println("pax account got error:", err)
+			log.Println("currency account got error:", err)
 		} else {
 			if currencyAccount.Available > 300 {
-				if (minSellPrice > 0 && sellPrice < minSellPrice) {
-					log.Println("limit sell exceeded limit price:", sellPrice)
+				if (minSellPrice > 0 && curSellPrice < minSellPrice) {
+					log.Println("limit sell exceeded limit price:", curSellPrice)
 				} else {
-					isOrderable, _ := api.IsOrderable(exchange.PAX_USDT)
+					isOrderable, _ := api.IsOrderable(symbol)
 					if isOrderable {
 						amount := currencyAccount.Available - 1
 						if amount > 1 {
-							sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", sellPrice), exchange.PAX_USDT)
+							sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", curSellPrice), symbol)
 							if err != nil {
-								log.Println("limit sell amount:", amount, "price:", sellPrice, "error:", err)
+								log.Println("limit sell amount:", amount, "price:", curSellPrice, "error:", err)
 							} else {
-								log.Println("limit sell amount:", amount, "price:", sellPrice, "success:", sellOrder.ID)
-								minSellPrice = sellPrice * 9997 / 10000
-								maxBuyPrice = sellPrice * 10003 / 10000
+								log.Println("limit sell amount:", amount, "price:", curSellPrice, "success:", sellOrder.ID)
+								lastSellPrice = curSellPrice
+								minSellPrice = curSellPrice * downRise
+								maxBuyPrice = curSellPrice * upRise
 							}
 						}
 					} else {
@@ -130,7 +153,7 @@ func main() {
 	}
 }
 
-func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChannel, maxBuyPrice float64, minSellPrice float64) {
+func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChannel) {
 	for update := range updates {
 		if update.Message == nil {
 			continue
@@ -139,9 +162,9 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 
 		switch update.Message.Text {
 		case "b":
-			usdtAccount, _ := api.GetSubAccount(exchange.USDT)
-			currencyAccount, _ := api.GetSubAccount(exchange.PAX)
-			taker, _ := api.GetTicker(exchange.PAX_USDT)
+			usdtAccount, _ := api.GetSubAccount(baseCurrency)
+			currencyAccount, _ := api.GetSubAccount(quoteCurrency)
+			taker, _ := api.GetTicker(symbol)
 			currencyToUsdt := decimal.NewFromFloat(currencyAccount.Balance).Mul(decimal.NewFromFloat(taker.Sell))
 			balance := decimal.NewFromFloat(usdtAccount.Balance).Add(currencyToUsdt)
 			balanceOut, _ := strconv.ParseFloat(balance.String(), 64)
@@ -155,25 +178,8 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 			))
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "t":
-			taker, _ := api.GetTicker(exchange.PAX_USDT)
-			//takerBytes, _ := json.Marshal(taker)
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("symbol: %s, last: %s, lastVol: %s, buy: %s, buyVol: %s, sell: %s, sellVol: %s, high: %s, low: %s, baseVol: %s",
-				taker.Symbol,
-				fmt.Sprintf("%.4f", taker.Last),
-				fmt.Sprintf("%.4f", taker.LastVol),
-				fmt.Sprintf("%.4f", taker.Buy),
-				fmt.Sprintf("%.4f", taker.BuyVol),
-				fmt.Sprintf("%.4f", taker.Sell),
-				fmt.Sprintf("%.4f", taker.SellVol),
-				fmt.Sprintf("%.4f", taker.High),
-				fmt.Sprintf("%.4f", taker.Low),
-				fmt.Sprintf("%.4f", taker.BaseVol),
-			))
-			msg.ReplyToMessageID = update.Message.MessageID
-			_, _ = bot.Send(msg)
 		case "o":
-			orders, _ := api.GetActiveOrders(exchange.PAX_USDT)
+			orders, _ := api.GetActiveOrders(symbol)
 			buyCount := 0
 			sellCount := 0
 			if len(orders) > 0 {
@@ -194,6 +200,34 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
+		case "m":
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("curBuyPrice: %s, curSellPrice: %s, lastBuyPrice: %s, lastSellPrice: %s, maxBuyPrice: %s, minSellPrice: %s",
+				fmt.Sprintf("%.4f", curBuyPrice),
+				fmt.Sprintf("%.4f", curSellPrice),
+				fmt.Sprintf("%.4f", lastBuyPrice),
+				fmt.Sprintf("%.4f", lastSellPrice),
+				fmt.Sprintf("%.4f", maxBuyPrice),
+				fmt.Sprintf("%.4f", minSellPrice),
+			))
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
+		case "t":
+			taker, _ := api.GetTicker(symbol)
+			//takerBytes, _ := json.Marshal(taker)
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("symbol: %s, last: %s, lastVol: %s, buy: %s, buyVol: %s, sell: %s, sellVol: %s, high: %s, low: %s, baseVol: %s",
+				taker.Symbol,
+				fmt.Sprintf("%.4f", taker.Last),
+				fmt.Sprintf("%.4f", taker.LastVol),
+				fmt.Sprintf("%.4f", taker.Buy),
+				fmt.Sprintf("%.4f", taker.BuyVol),
+				fmt.Sprintf("%.4f", taker.Sell),
+				fmt.Sprintf("%.4f", taker.SellVol),
+				fmt.Sprintf("%.4f", taker.High),
+				fmt.Sprintf("%.4f", taker.Low),
+				fmt.Sprintf("%.4f", taker.BaseVol),
+			))
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
 		case "start":
 			maxBuyPrice = float64(0)
 			minSellPrice = float64(0)
@@ -201,9 +235,18 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
 		case "stop":
-			taker, _ := api.GetTicker(exchange.PAX_USDT)
+			taker, _ := api.GetTicker(symbol)
 			maxBuyPrice = taker.Buy / 2
 			minSellPrice = taker.Sell * 2
+
+			orders, _ := api.GetActiveOrders(symbol)
+			if len(orders) > 0 {
+				for _, order := range orders {
+					cancel, _ := api.CancelOrder(order.ID, symbol)
+					log.Println("cancel order when stop:", order.ID, "ret:", cancel)
+				}
+			}
+
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "max buy and min sell limit price in memory has been set.")
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
