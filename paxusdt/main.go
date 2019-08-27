@@ -25,8 +25,10 @@ var (
 	baseCurrency  = exchange.USDT
 	quoteCurrency = exchange.PAX
 
-	upRise   = float64(10003 / 10000)
-	downRise = float64(9997 / 10000)
+	availableLimit = float64(300)
+
+	upRise   = float64(10003.0 / 10000.0)
+	downRise = float64(9997.0 / 10000.0)
 
 	curBuyPrice   = float64(0)
 	curSellPrice  = float64(0)
@@ -95,7 +97,7 @@ func main() {
 		if err != nil {
 			log.Println("usdt account got error:", err)
 		} else {
-			if usdtAccount.Available > 300 {
+			if usdtAccount.Available > availableLimit {
 				if (maxBuyPrice > 0 && curBuyPrice > maxBuyPrice) {
 					log.Println("limit buy exceeded limit price:", curBuyPrice)
 				} else {
@@ -124,7 +126,7 @@ func main() {
 		if err != nil {
 			log.Println("currency account got error:", err)
 		} else {
-			if currencyAccount.Available > 300 {
+			if currencyAccount.Available > availableLimit {
 				if (minSellPrice > 0 && curSellPrice < minSellPrice) {
 					log.Println("limit sell exceeded limit price:", curSellPrice)
 				} else {
