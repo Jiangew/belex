@@ -40,6 +40,10 @@ func main() {
 
 	// async send telegram message
 	go sendMessage(api, bot, updates)
+
+	for {
+		time.Sleep(250 * time.Millisecond)
+	}
 }
 
 func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChannel) {
