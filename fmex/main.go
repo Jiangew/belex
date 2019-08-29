@@ -78,7 +78,7 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 			var sellOrders []string
 			if len(orders) > 0 {
 				for _, order := range orders {
-					ord := fmt.Sprintf("symbol: %s, price: %s, amount: %s, state: %s, filledAmount: %s",
+					ord := fmt.Sprintf("{ symbol: %s, price: %s, amount: %s, state: %s, filledAmount: %s },",
 						order.Symbol,
 						fmt.Sprintf("%.4f", order.Price),
 						fmt.Sprintf("%.4f", order.Amount),
