@@ -20,7 +20,7 @@ var ft = NewFCoin(&http.Client{
 		}).Dial,
 	},
 	Timeout: 10 * time.Second,
-}, "1412ac27e3f741c796f7c4600069d9f1", "4843754749be46919d986142917f06d7")
+}, "", "")
 
 func TestFCoin_GetTicker(t *testing.T) {
 	t.Log(ft.GetTicker(exchange.NewSymbol2("BTC_USDT")))

@@ -43,10 +43,10 @@ func main() {
 	fcws.ProxyUrl("socks5://127.0.0.1:1086")
 	fcws.SetCallbacks(printfTicker, printfDepth, printfTrade, printfKline)
 
-	fcws.SubscribeTicker(exchange.PAX_USDT)
-	fcws.SubscribeDepth(exchange.PAX_USDT, 2)
-	fcws.SubscribeKline(exchange.PAX_USDT, exchange.KLINE_PERIOD_1MIN)
-	fcws.SubscribeTrade(exchange.PAX_USDT)
+	_ = fcws.SubscribeTicker(exchange.PAX_USDT)
+	_ = fcws.SubscribeDepth(exchange.PAX_USDT, 2)
+	_ = fcws.SubscribeKline(exchange.PAX_USDT, exchange.KLINE_PERIOD_1MIN)
+	_ = fcws.SubscribeTrade(exchange.PAX_USDT)
 
 	time.Sleep(60 * 60 * time.Second)
 }

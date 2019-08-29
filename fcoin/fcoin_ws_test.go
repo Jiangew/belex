@@ -21,7 +21,7 @@ var fcws = NewFCoinWs(&http.Client{
 		}).Dial,
 	},
 	Timeout: 10 * time.Second,
-}, "1412ac27e3f741c796f7c4600069d9f1", "4843754749be46919d986142917f06d7")
+}, "", "")
 
 func init() {
 	fcws.ProxyUrl("socks5://127.0.0.1:1086")
@@ -45,8 +45,8 @@ func printfKline(kline *exchange.Kline, period int) {
 }
 
 func TestFCoinWs(t *testing.T) {
-	fcws.SubscribeTicker(exchange.FMEX_USDT)
-	fcws.SubscribeDepth(exchange.FMEX_USDT, 2)
-	fcws.SubscribeKline(exchange.FMEX_USDT, exchange.KLINE_PERIOD_1MIN)
-	fcws.SubscribeTrade(exchange.FMEX_USDT)
+	_ = fcws.SubscribeTicker(exchange.FMEX_USDT)
+	_ = fcws.SubscribeDepth(exchange.FMEX_USDT, 2)
+	_ = fcws.SubscribeKline(exchange.FMEX_USDT, exchange.KLINE_PERIOD_1MIN)
+	_ = fcws.SubscribeTrade(exchange.FMEX_USDT)
 }
