@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/jiangew/belex/exchange"
@@ -74,25 +73,32 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 		case "o":
 			orders, _ := api.GetActiveOrders(symbol)
 			buyCount := 0
-			var buyOrders []exchange.NewOrder
+			var buyOrders []string
 			sellCount := 0
-			var sellOrders []exchange.NewOrder
+			var sellOrders []string
 			if len(orders) > 0 {
 				for _, order := range orders {
+					ord := fmt.Sprintf("symbol: %s, price: %s, amount: %s, state: %s, filledAmount: %s",
+						order.Symbol,
+						fmt.Sprintf("%.4f", order.Price),
+						fmt.Sprintf("%.4f", order.Amount),
+						order.State,
+						fmt.Sprintf("%.4f", order.FilledAmount),
+					)
 					if order.Side == "buy" {
 						buyCount++
-						buyOrders = append(buyOrders, order)
+						buyOrders = append(buyOrders, ord)
 					} else if order.Side == "sell" {
 						sellCount++
-						sellOrders = append(sellOrders, order)
+						sellOrders = append(sellOrders, ord)
 					}
 				}
 			}
 			msgBody := ""
 			if len(orders) > 0 {
-				buyBytes, _ := json.Marshal(buyOrders)
-				sellBytes, _ := json.Marshal(sellOrders)
-				msgBody = fmt.Sprintf("buyCount: %d, buyOrders: %s, sellCount: %d, sellOrders: %s", buyCount, string(buyBytes), sellCount, string(sellBytes))
+				//buyBytes, _ := json.Marshal(buyOrders)
+				//sellBytes, _ := json.Marshal(sellOrders)
+				msgBody = fmt.Sprintf("buyCount: %d, buyOrders: %s, sellCount: %d, sellOrders: %s", buyCount, buyOrders, sellCount, sellOrders)
 			} else {
 				msgBody = "there is no active orders."
 			}
