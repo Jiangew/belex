@@ -62,11 +62,11 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 			balanceOut, _ := strconv.ParseFloat(balance.String(), 64)
 
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("balance: %s, usdt: %s, usdtFrozen: %s, currency: %s, currencyFrozen: %s",
-				fmt.Sprintf("%.4f", balanceOut),
-				fmt.Sprintf("%.4f", usdtAccount.Available),
-				fmt.Sprintf("%.4f", usdtAccount.Frozen),
-				fmt.Sprintf("%.4f", currencyAccount.Available),
-				fmt.Sprintf("%.4f", currencyAccount.Frozen),
+				exchange.FloatToStringForEx(balanceOut),
+				exchange.FloatToStringForEx(usdtAccount.Available),
+				exchange.FloatToStringForEx(usdtAccount.Frozen),
+				exchange.FloatToStringForEx(currencyAccount.Available),
+				exchange.FloatToStringForEx(currencyAccount.Frozen),
 			))
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
@@ -80,10 +80,10 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 				for _, order := range orders {
 					ord := fmt.Sprintf("{ symbol: %s, price: %s, amount: %s, state: %s, filledAmount: %s },",
 						order.Symbol,
-						fmt.Sprintf("%.4f", order.Price),
-						fmt.Sprintf("%.4f", order.Amount),
+						exchange.FloatToStringForEx(order.Price),
+						exchange.FloatToStringForEx(order.Amount),
 						order.State,
-						fmt.Sprintf("%.4f", order.FilledAmount),
+						exchange.FloatToStringForEx(order.FilledAmount),
 					)
 					if order.Side == "buy" {
 						buyCount++
@@ -109,15 +109,15 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 			taker, _ := api.GetTicker(symbol)
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("symbol: %s, last: %s, lastVol: %s, buy: %s, buyVol: %s, sell: %s, sellVol: %s, high: %s, low: %s, baseVol: %s",
 				taker.Symbol,
-				fmt.Sprintf("%.4f", taker.Last),
-				fmt.Sprintf("%.4f", taker.LastVol),
-				fmt.Sprintf("%.4f", taker.Buy),
-				fmt.Sprintf("%.4f", taker.BuyVol),
-				fmt.Sprintf("%.4f", taker.Sell),
-				fmt.Sprintf("%.4f", taker.SellVol),
-				fmt.Sprintf("%.4f", taker.High),
-				fmt.Sprintf("%.4f", taker.Low),
-				fmt.Sprintf("%.4f", taker.BaseVol),
+				exchange.FloatToStringForEx(taker.Last),
+				exchange.FloatToStringForEx(taker.LastVol),
+				exchange.FloatToStringForEx(taker.Buy),
+				exchange.FloatToStringForEx(taker.BuyVol),
+				exchange.FloatToStringForEx(taker.Sell),
+				exchange.FloatToStringForEx(taker.SellVol),
+				exchange.FloatToStringForEx(taker.High),
+				exchange.FloatToStringForEx(taker.Low),
+				exchange.FloatToStringForEx(taker.BaseVol),
 			))
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)

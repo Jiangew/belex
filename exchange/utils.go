@@ -90,11 +90,12 @@ func ToInt64(v interface{}) int64 {
 	}
 }
 
-/**
-n:保留的小数点位数
-*/
 func FloatToString(v float64, n int) string {
 	return fmt.Sprintf(fmt.Sprintf("%%.%df", n), v)
+}
+
+func FloatToStringForEx(v float64) string {
+	return fmt.Sprintf("%.4f", v)
 }
 
 func ValuesToJson(v url.Values) ([]byte, error) {

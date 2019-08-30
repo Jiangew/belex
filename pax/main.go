@@ -105,7 +105,7 @@ func main() {
 					if isOrderable {
 						amount := (usdtAccount.Available - 1) / curBuyPrice
 						if amount > 1 {
-							buyOrder, err := api.LimitBuy(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", curBuyPrice), symbol)
+							buyOrder, err := api.LimitBuy(exchange.FloatToStringForEx(amount), exchange.FloatToStringForEx(curBuyPrice), symbol)
 							if err != nil {
 								log.Println("limit buy amount:", amount, "price:", curBuyPrice, "error:", err)
 							} else {
@@ -134,7 +134,7 @@ func main() {
 					if isOrderable {
 						amount := currencyAccount.Available - 1
 						if amount > 1 {
-							sellOrder, err := api.LimitSell(fmt.Sprintf("%.4f", amount), fmt.Sprintf("%.4f", curSellPrice), symbol)
+							sellOrder, err := api.LimitSell(exchange.FloatToStringForEx(amount), exchange.FloatToStringForEx(curSellPrice), symbol)
 							if err != nil {
 								log.Println("limit sell amount:", amount, "price:", curSellPrice, "error:", err)
 							} else {
@@ -172,11 +172,11 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 			balanceOut, _ := strconv.ParseFloat(balance.String(), 64)
 
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("balance: %s, usdt: %s, usdtFrozen: %s, currency: %s, currencyFrozen: %s",
-				fmt.Sprintf("%.4f", balanceOut),
-				fmt.Sprintf("%.4f", usdtAccount.Available),
-				fmt.Sprintf("%.4f", usdtAccount.Frozen),
-				fmt.Sprintf("%.4f", currencyAccount.Available),
-				fmt.Sprintf("%.4f", currencyAccount.Frozen),
+				exchange.FloatToStringForEx(balanceOut),
+				exchange.FloatToStringForEx(usdtAccount.Available),
+				exchange.FloatToStringForEx(usdtAccount.Frozen),
+				exchange.FloatToStringForEx(currencyAccount.Available),
+				exchange.FloatToStringForEx(currencyAccount.Frozen),
 			))
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
@@ -204,12 +204,12 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 			_, _ = bot.Send(msg)
 		case "m":
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("curBuyPrice: %s, curSellPrice: %s, lastBuyPrice: %s, lastSellPrice: %s, maxBuyPrice: %s, minSellPrice: %s",
-				fmt.Sprintf("%.4f", curBuyPrice),
-				fmt.Sprintf("%.4f", curSellPrice),
-				fmt.Sprintf("%.4f", lastBuyPrice),
-				fmt.Sprintf("%.4f", lastSellPrice),
-				fmt.Sprintf("%.4f", maxBuyPrice),
-				fmt.Sprintf("%.4f", minSellPrice),
+				exchange.FloatToStringForEx(curBuyPrice),
+				exchange.FloatToStringForEx(curSellPrice),
+				exchange.FloatToStringForEx(lastBuyPrice),
+				exchange.FloatToStringForEx(lastSellPrice),
+				exchange.FloatToStringForEx(maxBuyPrice),
+				exchange.FloatToStringForEx(minSellPrice),
 			))
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
@@ -217,15 +217,15 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 			taker, _ := api.GetTicker(symbol)
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("symbol: %s, last: %s, lastVol: %s, buy: %s, buyVol: %s, sell: %s, sellVol: %s, high: %s, low: %s, baseVol: %s",
 				taker.Symbol,
-				fmt.Sprintf("%.4f", taker.Last),
-				fmt.Sprintf("%.4f", taker.LastVol),
-				fmt.Sprintf("%.4f", taker.Buy),
-				fmt.Sprintf("%.4f", taker.BuyVol),
-				fmt.Sprintf("%.4f", taker.Sell),
-				fmt.Sprintf("%.4f", taker.SellVol),
-				fmt.Sprintf("%.4f", taker.High),
-				fmt.Sprintf("%.4f", taker.Low),
-				fmt.Sprintf("%.4f", taker.BaseVol),
+				exchange.FloatToStringForEx(taker.Last),
+				exchange.FloatToStringForEx(taker.LastVol),
+				exchange.FloatToStringForEx(taker.Buy),
+				exchange.FloatToStringForEx(taker.BuyVol),
+				exchange.FloatToStringForEx(taker.Sell),
+				exchange.FloatToStringForEx(taker.SellVol),
+				exchange.FloatToStringForEx(taker.High),
+				exchange.FloatToStringForEx(taker.Low),
+				exchange.FloatToStringForEx(taker.BaseVol),
 			))
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
