@@ -105,7 +105,7 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "t":
+		case "taker":
 			taker, _ := api.GetTicker(symbol)
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("symbol: %s, last: %s, lastVol: %s, buy: %s, buyVol: %s, sell: %s, sellVol: %s, high: %s, low: %s, baseVol: %s",
 				taker.Symbol,
@@ -119,6 +119,18 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 				exchange.FloatToStringForEx(taker.Low),
 				exchange.FloatToStringForEx(taker.BaseVol),
 			))
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
+		case "cancel":
+			orders, _ := api.GetActiveOrders(symbol)
+			if len(orders) > 0 {
+				for _, order := range orders {
+					cancel, _ := api.CancelOrder(order.ID, symbol)
+					log.Println("cancel order:", order.ID, "ret:", cancel)
+				}
+			}
+			msgBody := fmt.Sprintf("symbol: %s count: %d active orders has been canceled.", len(orders), symbol.String())
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
 		}
