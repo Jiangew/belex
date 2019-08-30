@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbot "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/jiangew/belex/exchange"
 	"github.com/jiangew/belex/fcoin"
 	"github.com/shopspring/decimal"
@@ -43,11 +43,11 @@ func main() {
 	apiBuilder := fcoin.NewAPIBuilder().HttpTimeout(5 * time.Second)
 	api := apiBuilder.APIKey(key).APISecretkey(secret).Build(exchange.FCOIN)
 
-	bot, err := tgbotapi.NewBotAPI(bot)
+	bot, err := tgbot.NewBotAPI(bot)
 	if err != nil {
 		log.Panic(err)
 	}
-	u := tgbotapi.NewUpdate(0)
+	u := tgbot.NewUpdate(0)
 	u.Timeout = 60
 	updates, err := bot.GetUpdatesChan(u)
 
@@ -65,13 +65,13 @@ func main() {
 
 	// main quant
 	for {
-		taker, err := api.GetTicker(symbol)
+		ticker, err := api.GetTicker(symbol)
 		if err != nil {
 			log.Println("usdt account got error:", err)
 			continue
 		} else {
-			curBuyPrice = taker.Buy
-			curSellPrice = taker.Sell
+			curBuyPrice = ticker.Buy
+			curSellPrice = ticker.Sell
 			log.Println("bid price:", curBuyPrice)
 			log.Println("ask price:", curSellPrice)
 		}
@@ -155,29 +155,24 @@ func main() {
 	}
 }
 
-func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.UpdatesChannel) {
+func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChannel) {
 	for update := range updates {
 		if update.Message == nil {
 			continue
 		}
-		//log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+		//log.Printf("user: %s, text: %s", update.Message.From.UserName, update.Message.Text)
 
 		switch update.Message.Text {
 		case "b":
 			usdtAccount, _ := api.GetSubAccount(baseCurrency)
 			currencyAccount, _ := api.GetSubAccount(quoteCurrency)
-			taker, _ := api.GetTicker(symbol)
-			currencyToUsdt := decimal.NewFromFloat(currencyAccount.Balance).Mul(decimal.NewFromFloat(taker.Sell))
+			ticker, _ := api.GetTicker(symbol)
+			currencyToUsdt := decimal.NewFromFloat(currencyAccount.Balance).Mul(decimal.NewFromFloat(ticker.Sell))
 			balance := decimal.NewFromFloat(usdtAccount.Balance).Add(currencyToUsdt)
 			balanceOut, _ := strconv.ParseFloat(balance.String(), 64)
 
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("balance: %s, usdt: %s, usdtFrozen: %s, currency: %s, currencyFrozen: %s",
-				exchange.FloatToStringForEx(balanceOut),
-				exchange.FloatToStringForEx(usdtAccount.Available),
-				exchange.FloatToStringForEx(usdtAccount.Frozen),
-				exchange.FloatToStringForEx(currencyAccount.Available),
-				exchange.FloatToStringForEx(currencyAccount.Frozen),
-			))
+			msgBody := exchange.FmtBalance(balanceOut, usdtAccount.Available, usdtAccount.Frozen, currencyAccount.Available, currencyAccount.Frozen)
+			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
 		case "o":
@@ -193,52 +188,36 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 					}
 				}
 			}
+
 			msgBody := ""
 			if len(orders) > 0 {
 				msgBody = fmt.Sprintf("buyCount: %d, sellCount: %d", buyCount, sellCount)
 			} else {
 				msgBody = "there is no active orders."
 			}
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgBody)
+			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
+		case "t":
+			ticker, _ := api.GetTicker(symbol)
+			msg := tgbot.NewMessage(update.Message.Chat.ID, exchange.FmtTicker(ticker))
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
 		case "m":
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("curBuyPrice: %s, curSellPrice: %s, lastBuyPrice: %s, lastSellPrice: %s, maxBuyPrice: %s, minSellPrice: %s",
-				exchange.FloatToStringForEx(curBuyPrice),
-				exchange.FloatToStringForEx(curSellPrice),
-				exchange.FloatToStringForEx(lastBuyPrice),
-				exchange.FloatToStringForEx(lastSellPrice),
-				exchange.FloatToStringForEx(maxBuyPrice),
-				exchange.FloatToStringForEx(minSellPrice),
-			))
-			msg.ReplyToMessageID = update.Message.MessageID
-			_, _ = bot.Send(msg)
-		case "taker":
-			taker, _ := api.GetTicker(symbol)
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("symbol: %s, last: %s, lastVol: %s, buy: %s, buyVol: %s, sell: %s, sellVol: %s, high: %s, low: %s, baseVol: %s",
-				taker.Symbol,
-				exchange.FloatToStringForEx(taker.Last),
-				exchange.FloatToStringForEx(taker.LastVol),
-				exchange.FloatToStringForEx(taker.Buy),
-				exchange.FloatToStringForEx(taker.BuyVol),
-				exchange.FloatToStringForEx(taker.Sell),
-				exchange.FloatToStringForEx(taker.SellVol),
-				exchange.FloatToStringForEx(taker.High),
-				exchange.FloatToStringForEx(taker.Low),
-				exchange.FloatToStringForEx(taker.BaseVol),
-			))
+			msgBody := exchange.FmtPaxMemoryStates(curBuyPrice, curSellPrice, lastBuyPrice, lastSellPrice, maxBuyPrice, minSellPrice)
+			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
 		case "start":
 			maxBuyPrice = float64(0)
 			minSellPrice = float64(0)
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "max buy and min sell limit price in memory has been cleared.")
+			msg := tgbot.NewMessage(update.Message.Chat.ID, "max buy and min sell limit price in memory has been cleared.")
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
 		case "stop":
-			taker, _ := api.GetTicker(symbol)
-			maxBuyPrice = taker.Buy / 2
-			minSellPrice = taker.Sell * 2
+			ticker, _ := api.GetTicker(symbol)
+			maxBuyPrice = ticker.Buy / 2
+			minSellPrice = ticker.Sell * 2
 
 			orders, _ := api.GetActiveOrders(symbol)
 			if len(orders) > 0 {
@@ -248,7 +227,7 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 				}
 			}
 
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "max buy and min sell limit price in memory has been set.")
+			msg := tgbot.NewMessage(update.Message.Chat.ID, "max buy and min sell limit price in memory has been set.")
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
 		}
