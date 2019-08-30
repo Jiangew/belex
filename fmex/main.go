@@ -129,7 +129,7 @@ func sendMessage(api exchange.API, bot *tgbotapi.BotAPI, updates tgbotapi.Update
 					log.Println("cancel order:", order.ID, "ret:", cancel)
 				}
 			}
-			msgBody := fmt.Sprintf("symbol: %s count: %d active orders has been canceled.", len(orders), symbol.String())
+			msgBody := fmt.Sprintf("symbol: %s count: %d active orders has been canceled.", symbol.String(), len(orders))
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
