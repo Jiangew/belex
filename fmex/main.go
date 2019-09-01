@@ -50,7 +50,6 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 		if update.Message == nil {
 			continue
 		}
-		//log.Printf("user: %s, text: %s", update.Message.From.UserName, update.Message.Text)
 
 		switch update.Message.Text {
 		case "b":
@@ -86,8 +85,6 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 
 			msgBody := ""
 			if len(orders) > 0 {
-				//buyBytes, _ := json.Marshal(buyOrders)
-				//sellBytes, _ := json.Marshal(sellOrders)
 				msgBody = fmt.Sprintf("buyCount: %d, buyOrders: %s, sellCount: %d, sellOrders: %s", buyCount, buyOrders, sellCount, sellOrders)
 			} else {
 				msgBody = "there is no active orders."
@@ -100,7 +97,7 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 			msg := tgbot.NewMessage(update.Message.Chat.ID, exchange.FmtTicker(ticker))
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "cancel":
+		case "c":
 			orders, _ := api.GetActiveOrders(symbol)
 			if len(orders) > 0 {
 				for _, order := range orders {

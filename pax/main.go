@@ -11,8 +11,6 @@ import (
 	"time"
 )
 
-//var wg sync.WaitGroup
-
 const (
 	proxy  = "socks5://127.0.0.1:1086"
 	key    = "d314f40f344646148246e1b314df721c"
@@ -160,7 +158,6 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 		if update.Message == nil {
 			continue
 		}
-		//log.Printf("user: %s, text: %s", update.Message.From.UserName, update.Message.Text)
 
 		switch update.Message.Text {
 		case "b":
