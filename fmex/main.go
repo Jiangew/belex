@@ -8,6 +8,7 @@ import (
 	"github.com/shopspring/decimal"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -67,16 +68,57 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 		case "o":
 			orders, _ := api.GetActiveOrders(symbol)
 			buyCount := 0
-			var buyOrders []string
 			sellCount := 0
-			var sellOrders []string
+			if len(orders) > 0 {
+				for _, order := range orders {
+					if order.Side == "buy" {
+						buyCount++
+					} else if order.Side == "sell" {
+						sellCount++
+					}
+				}
+			}
+
+			msgBody := ""
+			if len(orders) > 0 {
+				msgBody = fmt.Sprintf("buyCount: %d, sellCount: %d", buyCount, sellCount)
+			} else {
+				msgBody = "there is no active orders."
+			}
+			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
+		case "ob":
+			orders, _ := api.GetActiveOrders(symbol)
+			buyCount := 0
+			var buyOrders []string
 			if len(orders) > 0 {
 				for _, order := range orders {
 					ord := exchange.FmtOrder(order.Symbol, order.Price, order.Amount, order.State, order.FilledAmount)
 					if order.Side == "buy" {
 						buyCount++
 						buyOrders = append(buyOrders, ord)
-					} else if order.Side == "sell" {
+					}
+				}
+			}
+
+			msgBody := ""
+			if len(orders) > 0 {
+				msgBody = fmt.Sprintf("buyCount: %d, buyOrders: %s", buyCount, strings.Join(buyOrders, ","))
+			} else {
+				msgBody = "there is no buy active orders."
+			}
+			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
+		case "os":
+			orders, _ := api.GetActiveOrders(symbol)
+			sellCount := 0
+			var sellOrders []string
+			if len(orders) > 0 {
+				for _, order := range orders {
+					ord := exchange.FmtOrder(order.Symbol, order.Price, order.Amount, order.State, order.FilledAmount)
+					if order.Side == "sell" {
 						sellCount++
 						sellOrders = append(sellOrders, ord)
 					}
@@ -85,9 +127,9 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 
 			msgBody := ""
 			if len(orders) > 0 {
-				msgBody = fmt.Sprintf("buyCount: %d, buyOrders: %s, sellCount: %d, sellOrders: %s", buyCount, buyOrders, sellCount, sellOrders)
+				msgBody = fmt.Sprintf("sellCount: %d, sellOrders: %s", sellCount, strings.Join(sellOrders, ","))
 			} else {
-				msgBody = "there is no active orders."
+				msgBody = "there is no sell active orders."
 			}
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
