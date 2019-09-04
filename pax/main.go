@@ -162,7 +162,7 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 
 		switch update.Message.Text {
 		case "func":
-			msgBody := fmt.Sprintf("b -> %s\n, o -> %s\n, t -> %s\n, m -> %s\n, start -> %s\n, stop -> %s\n, fb -> %s\n, fo -> %s\n, fbo -> %s\n, fso -> %s\n",
+			msgBody := fmt.Sprintf("b -> %s\n o -> %s\n t -> %s\n m -> %s\n start -> %s\n stop -> %s\n fb -> %s\n fo -> %s\n fbo -> %s\n fso -> %s\n",
 				"pax balance",
 				"pax stats orders",
 				"pax ticker",
@@ -293,7 +293,7 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 
 			msgBody := ""
 			if len(orders) > 0 {
-				msgBody = fmt.Sprintf("buyCount: %d\n, buyOrders: %s", buyCount, strings.Join(buyOrders, ",\n"))
+				msgBody = fmt.Sprintf("buyCount: %d\n buyOrders: %s", buyCount, strings.Join(buyOrders, ",\n"))
 			} else {
 				msgBody = "there is no buy active orders."
 			}
@@ -316,7 +316,7 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 
 			msgBody := ""
 			if len(orders) > 0 {
-				msgBody = fmt.Sprintf("sellCount: %d\n, sellOrders: %s", sellCount, strings.Join(sellOrders, ",\n"))
+				msgBody = fmt.Sprintf("sellCount: %d\n sellOrders: %s", sellCount, strings.Join(sellOrders, ",\n"))
 			} else {
 				msgBody = "there is no sell active orders."
 			}
