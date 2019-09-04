@@ -12,6 +12,14 @@ func FmtBalance(balance float64, usdt float64, usdtFrozen float64, currency floa
 	)
 }
 
+func FmtCurrencyBalance(curencyBalance float64, currency float64, currencyFrozen float64) string {
+	return fmt.Sprintf("curencyBalance: %s, currency: %s, currencyFrozen: %s",
+		FloatToStringForEx(curencyBalance),
+		FloatToStringForEx(currency),
+		FloatToStringForEx(currencyFrozen),
+	)
+}
+
 func FmtOrder(symbol string, price float64, amount float64, state string, filledAmount float64) string {
 	return fmt.Sprintf("{ symbol: %s, price: %s, amount: %s, state: %s, filledAmount: %s }",
 		symbol,

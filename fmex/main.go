@@ -53,6 +53,18 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 		}
 
 		switch update.Message.Text {
+		case "func":
+			msgBody := fmt.Sprintf("b -> %s\n, o -> %s\n, bo -> %s\n, so -> %s\n, t -> %s\n, c -> %s\n",
+				"fmex balance",
+				"fmex stats orders",
+				"fmex buy orders",
+				"fmex sell orders",
+				"fmex ticker",
+				"fmex cancel orders",
+			)
+			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
 		case "b":
 			usdtAccount, _ := api.GetSubAccount(baseCurrency)
 			currencyAccount, _ := api.GetSubAccount(quoteCurrency)
@@ -88,7 +100,7 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "ob":
+		case "bo":
 			orders, _ := api.GetActiveOrders(symbol)
 			buyCount := 0
 			var buyOrders []string
@@ -104,14 +116,14 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 
 			msgBody := ""
 			if len(orders) > 0 {
-				msgBody = fmt.Sprintf("buyCount: %d, buyOrders: %s", buyCount, strings.Join(buyOrders, ", "))
+				msgBody = fmt.Sprintf("buyCount: %d\n, buyOrders: %s", buyCount, strings.Join(buyOrders, ",\n"))
 			} else {
 				msgBody = "there is no buy active orders."
 			}
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "os":
+		case "so":
 			orders, _ := api.GetActiveOrders(symbol)
 			sellCount := 0
 			var sellOrders []string
@@ -127,7 +139,7 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 
 			msgBody := ""
 			if len(orders) > 0 {
-				msgBody = fmt.Sprintf("sellCount: %d, sellOrders: %s", sellCount, strings.Join(sellOrders, ", "))
+				msgBody = fmt.Sprintf("sellCount: %d\n, sellOrders: %s", sellCount, strings.Join(sellOrders, ",\n"))
 			} else {
 				msgBody = "there is no sell active orders."
 			}
