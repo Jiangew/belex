@@ -170,8 +170,8 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 				"stop -> stop service\n" +
 				"fb -> ft balance\n" +
 				"fo -> ft stats orders\n" +
-				"fbo -> ft buy orders\n" +
-				"fso -> ft sell orders";
+				"bo -> ft buy orders\n" +
+				"so -> ft sell orders";
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
