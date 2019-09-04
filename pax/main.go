@@ -161,7 +161,7 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 		}
 
 		switch update.Message.Text {
-		case "func":
+		case "x":
 			msgBody := "b     -> pax balance\n" +
 				"o     -> pax stats orders\n" +
 				"t     -> pax ticker\n" +
