@@ -162,16 +162,16 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 
 		switch update.Message.Text {
 		case "x":
-			msgBody := "b     -> pax balance\n" +
-				"o     -> pax stats orders\n" +
-				"t     -> pax ticker\n" +
-				"m     -> pax exchange states in memory\n" +
+			msgBody := "b -> pax balance\n" +
+				"o -> pax stats orders\n" +
+				"t -> pax ticker\n" +
+				"m -> pax exchange states in memory\n" +
 				"start -> start service\n" +
-				"stop  -> stop service\n" +
-				"fb    -> ft balance\n" +
-				"fo    -> ft stats orders\n" +
-				"fbo   -> ft buy orders\n" +
-				"fso   -> ft sell orders";
+				"stop -> stop service\n" +
+				"fb -> ft balance\n" +
+				"fo -> ft stats orders\n" +
+				"fbo -> ft buy orders\n" +
+				"fso -> ft sell orders";
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
