@@ -12,11 +12,15 @@ func FmtBalance(balance float64, usdt float64, usdtFrozen float64, currency floa
 	)
 }
 
-func FmtCurrencyBalance(curencyBalance float64, currency float64, currencyFrozen float64) string {
-	return fmt.Sprintf("curencyBalance: %s, currency: %s, currencyFrozen: %s",
-		FloatToStringForEx(curencyBalance),
-		FloatToStringForEx(currency),
-		FloatToStringForEx(currencyFrozen),
+func FmtBalanceExt(balance float64, usdt float64, usdtFrozen float64, fmex float64, fmexFrozen float64, ft float64, ftFrozen float64) string {
+	return fmt.Sprintf("balance: %s, usdt: %s, usdtFrozen: %s, fmex: %s, fmexFrozen: %s, ft: %s, ftFrozen: %s",
+		FloatToStringForEx(balance),
+		FloatToStringForEx(usdt),
+		FloatToStringForEx(usdtFrozen),
+		FloatToStringForEx(fmex),
+		FloatToStringForEx(fmexFrozen),
+		FloatToStringForEx(ft),
+		FloatToStringForEx(ftFrozen),
 	)
 }
 

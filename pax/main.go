@@ -8,7 +8,6 @@ import (
 	"github.com/shopspring/decimal"
 	"log"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -162,16 +161,12 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 
 		switch update.Message.Text {
 		case "x":
-			msgBody := "b -> pax balance\n" +
-				"o -> pax stats orders\n" +
-				"t -> pax ticker\n" +
-				"m -> pax exchange states in memory\n" +
+			msgBody := "b -> stats balance\n" +
+				"o -> stats orders\n" +
+				"t -> ticker\n" +
+				"m -> exchange states in memory\n" +
 				"start -> start service\n" +
-				"stop -> stop service\n" +
-				"fb -> ft balance\n" +
-				"fo -> ft stats orders\n" +
-				"bo -> ft buy orders\n" +
-				"so -> ft sell orders";
+				"stop -> stop service";
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
@@ -240,85 +235,6 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 			}
 
 			msg := tgbot.NewMessage(update.Message.Chat.ID, "max buy and min sell limit price in memory has been set.")
-			msg.ReplyToMessageID = update.Message.MessageID
-			_, _ = bot.Send(msg)
-		case "fb":
-			ftAccount, _ := api.GetSubAccount(exchange.FT)
-			ticker, _ := api.GetTicker(exchange.FT_USDT)
-			ftToUsdt := decimal.NewFromFloat(ftAccount.Balance).Mul(decimal.NewFromFloat(ticker.Sell))
-			balanceOut, _ := strconv.ParseFloat(ftToUsdt.String(), 64)
-
-			msgBody := exchange.FmtCurrencyBalance(balanceOut, ftAccount.Available, ftAccount.Frozen)
-			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
-			msg.ReplyToMessageID = update.Message.MessageID
-			_, _ = bot.Send(msg)
-		case "fo":
-			orders, _ := api.GetActiveOrders(exchange.FT_USDT)
-			buyCount := 0
-			sellCount := 0
-			if len(orders) > 0 {
-				for _, order := range orders {
-					if order.Side == "buy" {
-						buyCount++
-					} else if order.Side == "sell" {
-						sellCount++
-					}
-				}
-			}
-
-			msgBody := ""
-			if len(orders) > 0 {
-				msgBody = fmt.Sprintf("buyCount: %d, sellCount: %d", buyCount, sellCount)
-			} else {
-				msgBody = "there is no active orders."
-			}
-			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
-			msg.ReplyToMessageID = update.Message.MessageID
-			_, _ = bot.Send(msg)
-		case "fbo":
-			orders, _ := api.GetActiveOrders(exchange.FT_USDT)
-			buyCount := 0
-			var buyOrders []string
-			if len(orders) > 0 {
-				for _, order := range orders {
-					ord := exchange.FmtOrder(order.Symbol, order.Price, order.Amount, order.State, order.FilledAmount)
-					if order.Side == "buy" {
-						buyCount++
-						buyOrders = append(buyOrders, ord)
-					}
-				}
-			}
-
-			msgBody := ""
-			if len(orders) > 0 {
-				msgBody = fmt.Sprintf("buyCount: %d\nbuyOrders: %s", buyCount, strings.Join(buyOrders, ",\n"))
-			} else {
-				msgBody = "there is no buy active orders."
-			}
-			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
-			msg.ReplyToMessageID = update.Message.MessageID
-			_, _ = bot.Send(msg)
-		case "fso":
-			orders, _ := api.GetActiveOrders(exchange.FT_USDT)
-			sellCount := 0
-			var sellOrders []string
-			if len(orders) > 0 {
-				for _, order := range orders {
-					ord := exchange.FmtOrder(order.Symbol, order.Price, order.Amount, order.State, order.FilledAmount)
-					if order.Side == "sell" {
-						sellCount++
-						sellOrders = append(sellOrders, ord)
-					}
-				}
-			}
-
-			msgBody := ""
-			if len(orders) > 0 {
-				msgBody = fmt.Sprintf("sellCount: %d\nsellOrders: %s", sellCount, strings.Join(sellOrders, ",\n"))
-			} else {
-				msgBody = "there is no sell active orders."
-			}
-			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
 		}

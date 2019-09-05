@@ -19,12 +19,6 @@ const (
 	bot    = "941710186:AAFS--hy65duDvrBhPQisWIVgVCj8FMixcc"
 )
 
-var (
-	symbol        = exchange.FMEX_USDT
-	baseCurrency  = exchange.USDT
-	quoteCurrency = exchange.FMEX
-)
-
 func main() {
 	//apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second).HttpProxy(proxy)
 	apiBuilder := fcoin.NewAPIBuilder().HttpTimeout(5 * time.Second)
@@ -54,29 +48,47 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 
 		switch update.Message.Text {
 		case "x":
-			msgBody := "b -> fmex balance\n" +
-				"o -> fmex stats orders\n" +
-				"bo -> fmex buy orders\n" +
-				"so -> fmex sell orders\n" +
-				"t -> fmex ticker\n" +
-				"c -> fmex cancel orders";
+			msgBody := "b -> account balance\n" +
+				"\n" +
+				"mt -> fmex ticker\n" +
+				"mo -> fmex stats orders\n" +
+				"mb -> fmex buy orders\n" +
+				"ms -> fmex sell orders\n" +
+				"mc -> fmex cancel orders\n" +
+				"\n" +
+				"tt -> ft ticker\n" +
+				"to -> ft stats orders\n" +
+				"tb -> ft buy orders\n" +
+				"ts -> ft sell orders\n" +
+				"tc -> ft cancel orders";
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
 		case "b":
-			usdtAccount, _ := api.GetSubAccount(baseCurrency)
-			currencyAccount, _ := api.GetSubAccount(quoteCurrency)
-			ticker, _ := api.GetTicker(symbol)
-			currencyToUsdt := decimal.NewFromFloat(currencyAccount.Balance).Mul(decimal.NewFromFloat(ticker.Sell))
-			balance := decimal.NewFromFloat(usdtAccount.Balance).Add(currencyToUsdt)
+			usdtAccount, _ := api.GetSubAccount(exchange.USDT)
+
+			fmexAccount, _ := api.GetSubAccount(exchange.FMEX)
+			fmexTicker, _ := api.GetTicker(exchange.FMEX_USDT)
+			fmexToUsdt := decimal.NewFromFloat(fmexAccount.Balance).Mul(decimal.NewFromFloat(fmexTicker.Sell))
+
+			ftAccount, _ := api.GetSubAccount(exchange.FT)
+			ftTicker, _ := api.GetTicker(exchange.FT_USDT)
+			ftToUsdt := decimal.NewFromFloat(ftAccount.Balance).Mul(decimal.NewFromFloat(ftTicker.Sell))
+
+			balance := decimal.NewFromFloat(usdtAccount.Balance).Add(fmexToUsdt).Add(ftToUsdt)
 			balanceOut, _ := strconv.ParseFloat(balance.String(), 64)
 
-			msgBody := exchange.FmtBalance(balanceOut, usdtAccount.Available, usdtAccount.Frozen, currencyAccount.Available, currencyAccount.Frozen)
+			msgBody := exchange.FmtBalanceExt(balanceOut, usdtAccount.Available, usdtAccount.Frozen, fmexAccount.Available, fmexAccount.Frozen, ftAccount.Available, ftAccount.Frozen)
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "o":
-			orders, _ := api.GetActiveOrders(symbol)
+		case "mt":
+			ticker, _ := api.GetTicker(exchange.FMEX_USDT)
+			msg := tgbot.NewMessage(update.Message.Chat.ID, exchange.FmtTicker(ticker))
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
+		case "mo":
+			orders, _ := api.GetActiveOrders(exchange.FMEX_USDT)
 			buyCount := 0
 			sellCount := 0
 			if len(orders) > 0 {
@@ -98,8 +110,8 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "bo":
-			orders, _ := api.GetActiveOrders(symbol)
+		case "mb":
+			orders, _ := api.GetActiveOrders(exchange.FMEX_USDT)
 			buyCount := 0
 			var buyOrders []string
 			if len(orders) > 0 {
@@ -121,8 +133,8 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "so":
-			orders, _ := api.GetActiveOrders(symbol)
+		case "ms":
+			orders, _ := api.GetActiveOrders(exchange.FMEX_USDT)
 			sellCount := 0
 			var sellOrders []string
 			if len(orders) > 0 {
@@ -144,21 +156,103 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "t":
-			ticker, _ := api.GetTicker(symbol)
-			msg := tgbot.NewMessage(update.Message.Chat.ID, exchange.FmtTicker(ticker))
-			msg.ReplyToMessageID = update.Message.MessageID
-			_, _ = bot.Send(msg)
-		case "c":
-			orders, _ := api.GetActiveOrders(symbol)
+		case "mc":
+			orders, _ := api.GetActiveOrders(exchange.FMEX_USDT)
 			if len(orders) > 0 {
 				for _, order := range orders {
-					cancel, _ := api.CancelOrder(order.ID, symbol)
+					cancel, _ := api.CancelOrder(order.ID, exchange.FMEX_USDT)
 					log.Println("cancel order:", order.ID, "ret:", cancel)
 				}
 			}
 
-			msgBody := fmt.Sprintf("symbol: %s count: %d active orders has been canceled.", symbol.String(), len(orders))
+			msgBody := fmt.Sprintf("symbol: %s count: %d active orders has been canceled.", exchange.FMEX_USDT.String(), len(orders))
+			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
+		case "tt":
+			ticker, _ := api.GetTicker(exchange.FT_USDT)
+			msg := tgbot.NewMessage(update.Message.Chat.ID, exchange.FmtTicker(ticker))
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
+		case "to":
+			orders, _ := api.GetActiveOrders(exchange.FT_USDT)
+			buyCount := 0
+			sellCount := 0
+			if len(orders) > 0 {
+				for _, order := range orders {
+					if order.Side == "buy" {
+						buyCount++
+					} else if order.Side == "sell" {
+						sellCount++
+					}
+				}
+			}
+
+			msgBody := ""
+			if len(orders) > 0 {
+				msgBody = fmt.Sprintf("buyCount: %d, sellCount: %d", buyCount, sellCount)
+			} else {
+				msgBody = "there is no active orders."
+			}
+			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
+		case "tb":
+			orders, _ := api.GetActiveOrders(exchange.FT_USDT)
+			buyCount := 0
+			var buyOrders []string
+			if len(orders) > 0 {
+				for _, order := range orders {
+					ord := exchange.FmtOrder(order.Symbol, order.Price, order.Amount, order.State, order.FilledAmount)
+					if order.Side == "buy" {
+						buyCount++
+						buyOrders = append(buyOrders, ord)
+					}
+				}
+			}
+
+			msgBody := ""
+			if len(orders) > 0 {
+				msgBody = fmt.Sprintf("buyCount: %d\nbuyOrders: %s", buyCount, strings.Join(buyOrders, ",\n"))
+			} else {
+				msgBody = "there is no buy active orders."
+			}
+			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
+		case "ts":
+			orders, _ := api.GetActiveOrders(exchange.FT_USDT)
+			sellCount := 0
+			var sellOrders []string
+			if len(orders) > 0 {
+				for _, order := range orders {
+					ord := exchange.FmtOrder(order.Symbol, order.Price, order.Amount, order.State, order.FilledAmount)
+					if order.Side == "sell" {
+						sellCount++
+						sellOrders = append(sellOrders, ord)
+					}
+				}
+			}
+
+			msgBody := ""
+			if len(orders) > 0 {
+				msgBody = fmt.Sprintf("sellCount: %d\nsellOrders: %s", sellCount, strings.Join(sellOrders, ",\n"))
+			} else {
+				msgBody = "there is no sell active orders."
+			}
+			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
+		case "tc":
+			orders, _ := api.GetActiveOrders(exchange.FT_USDT)
+			if len(orders) > 0 {
+				for _, order := range orders {
+					cancel, _ := api.CancelOrder(order.ID, exchange.FT_USDT)
+					log.Println("cancel order:", order.ID, "ret:", cancel)
+				}
+			}
+
+			msgBody := fmt.Sprintf("symbol: %s count: %d active orders has been canceled.", exchange.FT_USDT.String(), len(orders))
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
