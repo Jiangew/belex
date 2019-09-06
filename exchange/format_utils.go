@@ -2,13 +2,15 @@ package exchange
 
 import "fmt"
 
-func FmtBalance(balance float64, usdt float64, usdtFrozen float64, currency float64, currencyFrozen float64) string {
-	return fmt.Sprintf("balance: %s, usdt: %s, usdtFrozen: %s, currency: %s, currencyFrozen: %s",
+func FmtBalance(balance float64, usdt float64, usdtFrozen float64, currency float64, currencyFrozen float64, ft float64, ftFrozen float64) string {
+	return fmt.Sprintf("balance: %s, usdt: %s, usdtFrozen: %s, currency: %s, currencyFrozen: %s, ft: %s, ftFrozen: %s",
 		FloatToStringForEx(balance),
 		FloatToStringForEx(usdt),
 		FloatToStringForEx(usdtFrozen),
 		FloatToStringForEx(currency),
 		FloatToStringForEx(currencyFrozen),
+		FloatToStringForEx(ft),
+		FloatToStringForEx(ftFrozen),
 	)
 }
 

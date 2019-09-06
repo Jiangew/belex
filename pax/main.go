@@ -172,13 +172,16 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 			_, _ = bot.Send(msg)
 		case "b":
 			usdtAccount, _ := api.GetSubAccount(baseCurrency)
+			ftAccount, _ := api.GetSubAccount(exchange.FT)
+
 			currencyAccount, _ := api.GetSubAccount(quoteCurrency)
-			ticker, _ := api.GetTicker(symbol)
-			currencyToUsdt := decimal.NewFromFloat(currencyAccount.Balance).Mul(decimal.NewFromFloat(ticker.Sell))
+			currencyTicker, _ := api.GetTicker(symbol)
+			currencyToUsdt := decimal.NewFromFloat(currencyAccount.Balance).Mul(decimal.NewFromFloat(currencyTicker.Sell))
+
 			balance := decimal.NewFromFloat(usdtAccount.Balance).Add(currencyToUsdt)
 			balanceOut, _ := strconv.ParseFloat(balance.String(), 64)
 
-			msgBody := exchange.FmtBalance(balanceOut, usdtAccount.Available, usdtAccount.Frozen, currencyAccount.Available, currencyAccount.Frozen)
+			msgBody := exchange.FmtBalance(balanceOut, usdtAccount.Available, usdtAccount.Frozen, currencyAccount.Available, currencyAccount.Frozen, ftAccount.Available, ftAccount.Frozen)
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
