@@ -50,17 +50,17 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 		case "x":
 			msgBody := "b -> account balance\n" +
 				"\n" +
-				"mt -> fmex ticker\n" +
-				"mo -> fmex stats orders\n" +
-				"mb -> fmex buy orders\n" +
-				"ms -> fmex sell orders\n" +
-				"mc -> fmex cancel orders\n" +
+				"fmt -> fmex ticker\n" +
+				"fmo -> fmex stats orders\n" +
+				"fmb -> fmex buy orders\n" +
+				"fms -> fmex sell orders\n" +
+				"fmc -> fmex cancel orders\n" +
 				"\n" +
-				"tt -> ft ticker\n" +
-				"to -> ft stats orders\n" +
-				"tb -> ft buy orders\n" +
-				"ts -> ft sell orders\n" +
-				"tc -> ft cancel orders";
+				"ftt -> ft ticker\n" +
+				"fto -> ft stats orders\n" +
+				"ftb -> ft buy orders\n" +
+				"fts -> ft sell orders\n" +
+				"ftc -> ft cancel orders";
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
