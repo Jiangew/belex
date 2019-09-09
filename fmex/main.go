@@ -82,12 +82,12 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "mt":
+		case "fmt":
 			ticker, _ := api.GetTicker(exchange.FMEX_USDT)
 			msg := tgbot.NewMessage(update.Message.Chat.ID, exchange.FmtTicker(ticker))
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "mo":
+		case "fmo":
 			orders, _ := api.GetActiveOrders(exchange.FMEX_USDT)
 			buyCount := 0
 			sellCount := 0
@@ -110,7 +110,7 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "mb":
+		case "fmb":
 			orders, _ := api.GetActiveOrders(exchange.FMEX_USDT)
 			buyCount := 0
 			var buyOrders []string
@@ -133,7 +133,7 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "ms":
+		case "fms":
 			orders, _ := api.GetActiveOrders(exchange.FMEX_USDT)
 			sellCount := 0
 			var sellOrders []string
@@ -156,7 +156,7 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "mc":
+		case "fmc":
 			orders, _ := api.GetActiveOrders(exchange.FMEX_USDT)
 			if len(orders) > 0 {
 				for _, order := range orders {
@@ -169,12 +169,12 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "tt":
+		case "ftt":
 			ticker, _ := api.GetTicker(exchange.FT_USDT)
 			msg := tgbot.NewMessage(update.Message.Chat.ID, exchange.FmtTicker(ticker))
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "to":
+		case "fto":
 			orders, _ := api.GetActiveOrders(exchange.FT_USDT)
 			buyCount := 0
 			sellCount := 0
@@ -197,7 +197,7 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "tb":
+		case "ftb":
 			orders, _ := api.GetActiveOrders(exchange.FT_USDT)
 			buyCount := 0
 			var buyOrders []string
@@ -220,7 +220,7 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "ts":
+		case "fts":
 			orders, _ := api.GetActiveOrders(exchange.FT_USDT)
 			sellCount := 0
 			var sellOrders []string
@@ -243,7 +243,7 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
-		case "tc":
+		case "ftc":
 			orders, _ := api.GetActiveOrders(exchange.FT_USDT)
 			if len(orders) > 0 {
 				for _, order := range orders {
