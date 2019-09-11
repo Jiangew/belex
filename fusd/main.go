@@ -96,11 +96,11 @@ func main() {
 			log.Println("usdt account got error:", err)
 		} else {
 			if usdtAccount.Available > availableLimit {
-				if (maxBuyPrice > 0 && curBuyPrice > maxBuyPrice) {
-					log.Println("limit buy exceeded limit price:", curBuyPrice)
-				} else {
-					isOrderable, _ := api.IsOrderable(symbol)
-					if isOrderable {
+				isOrderable, _ := api.IsOrderable(symbol)
+				if isOrderable {
+					if (maxBuyPrice > 0 && curBuyPrice > maxBuyPrice) {
+						log.Println("limit buy exceeded limit price:", curBuyPrice)
+					} else {
 						amount := (usdtAccount.Available - 1) / curBuyPrice
 						if amount > 1 {
 							buyOrder, err := api.LimitBuy(exchange.FloatToStringForEx(amount), exchange.FloatToStringForEx(curBuyPrice), symbol)
@@ -109,13 +109,12 @@ func main() {
 							} else {
 								log.Println("limit buy amount:", amount, "price:", curBuyPrice, "success:", buyOrder.ID)
 								lastBuyPrice = curBuyPrice
-								maxBuyPrice = curBuyPrice * upRise
 								minSellPrice = curBuyPrice * downRise
 							}
 						}
-					} else {
-						log.Println("limit buy isOrderable:", false)
 					}
+				} else {
+					log.Println("limit buy isOrderable:", false)
 				}
 			}
 		}
@@ -125,11 +124,11 @@ func main() {
 			log.Println("currency account got error:", err)
 		} else {
 			if currencyAccount.Available > availableLimit {
-				if (minSellPrice > 0 && curSellPrice < minSellPrice) {
-					log.Println("limit sell exceeded limit price:", curSellPrice)
-				} else {
-					isOrderable, _ := api.IsOrderable(symbol)
-					if isOrderable {
+				isOrderable, _ := api.IsOrderable(symbol)
+				if isOrderable {
+					if (minSellPrice > 0 && curSellPrice < minSellPrice) {
+						log.Println("limit sell exceeded limit price:", curSellPrice)
+					} else {
 						amount := currencyAccount.Available - 1
 						if amount > 1 {
 							sellOrder, err := api.LimitSell(exchange.FloatToStringForEx(amount), exchange.FloatToStringForEx(curSellPrice), symbol)
@@ -138,13 +137,12 @@ func main() {
 							} else {
 								log.Println("limit sell amount:", amount, "price:", curSellPrice, "success:", sellOrder.ID)
 								lastSellPrice = curSellPrice
-								minSellPrice = curSellPrice * downRise
 								maxBuyPrice = curSellPrice * upRise
 							}
 						}
-					} else {
-						log.Println("limit sell isOrderable:", false)
 					}
+				} else {
+					log.Println("limit sell isOrderable:", false)
 				}
 			}
 		}
