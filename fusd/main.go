@@ -219,7 +219,7 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 		case "start":
 			maxBuyPrice = float64(0)
 			minSellPrice = float64(0)
-			msg := tgbot.NewMessage(update.Message.Chat.ID, "max buy and min sell limit price in memory has been cleared.")
+			msg := tgbot.NewMessage(update.Message.Chat.ID, "max buy and min sell limit price in memory has been set.")
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
 		case "stop":
@@ -235,7 +235,7 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 				}
 			}
 
-			msg := tgbot.NewMessage(update.Message.Chat.ID, "max buy and min sell limit price in memory has been set.")
+			msg := tgbot.NewMessage(update.Message.Chat.ID, "max buy and min sell limit price in memory has been cleared.")
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
 		}
