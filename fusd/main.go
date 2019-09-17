@@ -162,7 +162,7 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 			msgBody := "b -> stats balance\n" +
 				"o -> stats orders\n" +
 				"t -> ticker\n" +
-				"m -> exchange states in memory\n" +
+				"m -> states in memory\n" +
 				"start -> start service\n" +
 				"stop -> stop service";
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
