@@ -25,8 +25,8 @@ var (
 
 	availableLimit = float64(300)
 
-	upRise   = float64(10003.0 / 10000.0)
-	downRise = float64(9997.0 / 10000.0)
+	upRise   = 10003.0 / 10000.0
+	downRise = 9997.0 / 10000.0
 
 	curBuyPrice   = float64(0)
 	curSellPrice  = float64(0)
@@ -98,7 +98,7 @@ func main() {
 			if usdtAccount.Available > availableLimit {
 				isOrderable, _ := api.IsOrderable(symbol)
 				if isOrderable {
-					if (maxBuyPrice > 0 && curBuyPrice > maxBuyPrice) {
+					if maxBuyPrice > 0 && curBuyPrice > maxBuyPrice {
 						log.Println("limit buy exceeded limit price:", curBuyPrice)
 					} else {
 						amount := (usdtAccount.Available - 1) / curBuyPrice
@@ -126,7 +126,7 @@ func main() {
 			if currencyAccount.Available > availableLimit {
 				isOrderable, _ := api.IsOrderable(symbol)
 				if isOrderable {
-					if (minSellPrice > 0 && curSellPrice < minSellPrice) {
+					if minSellPrice > 0 && curSellPrice < minSellPrice {
 						log.Println("limit sell exceeded limit price:", curSellPrice)
 					} else {
 						amount := currencyAccount.Available - 1
