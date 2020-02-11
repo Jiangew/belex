@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	proxy  = "socks5://127.0.0.1:1086"
+	proxy  = "socks5://127.0.0.1:1080"
 	key    = "d314f40f344646148246e1b314df721c"
 	secret = "1869f3b5da2b4b0bb99cf8a9b692e828"
 	bot    = "960133387:AAGZ3dZ1FPO-lVJmVTUYsMxDZFUR5WDEEc0"
@@ -37,115 +37,137 @@ var (
 )
 
 func main() {
-	//apiBuilder := builder.NewAPIBuilder().HttpTimeout(5 * time.Second).HttpProxy(proxy)
-	apiBuilder := fcoin.NewAPIBuilder().HttpTimeout(5 * time.Second)
+	apiBuilder := fcoin.NewAPIBuilder().HttpTimeout(5 * time.Second).HttpProxy(proxy)
+	//apiBuilder := fcoin.NewAPIBuilder().HttpTimeout(5 * time.Second)
 	api := apiBuilder.APIKey(key).APISecretkey(secret).Build(exchange.FCOIN)
 
-	bot, err := tgbot.NewBotAPI(bot)
-	if err != nil {
-		log.Panic(err)
-	}
-	u := tgbot.NewUpdate(0)
-	u.Timeout = 60
-	updates, err := bot.GetUpdatesChan(u)
-
-	// async send telegram message
-	go sendMessage(api, bot, updates)
+	//bot, err := tgbot.NewBotAPI(bot)
+	//if err != nil {
+	//	log.Panic(err)
+	//}
+	//u := tgbot.NewUpdate(0)
+	//u.Timeout = 60
+	//updates, err := bot.GetUpdatesChan(u)
+	//
+	//// async send telegram message
+	//go sendMessage(api, bot, updates)
 
 	// cancel orders when start
-	orders, _ := api.GetActiveOrders(symbol)
-	if len(orders) > 0 {
-		for _, order := range orders {
-			cancel, _ := api.CancelOrder(order.ID, symbol)
-			log.Println("cancel order when start:", order.ID, "ret:", cancel)
-		}
+	//orderFT, _ := api.GetActiveOrders(exchange.FT_USDT)
+	//if len(orderFT) > 0 {
+	//	for _, order := range orderFT {
+	//		cancel, _ := api.CancelOrder(order.ID, symbol)
+	//		log.Println("cancel order when start:", order.ID, "ret:", cancel)
+	//	}
+	//}
+
+	//orderFM, _ := api.GetActiveOrders(exchange.FMEX_USDT)
+	//if len(orderFM) > 0 {
+	//	for _, order := range orderFM {
+	//		cancel, _ := api.CancelOrder(order.ID, symbol)
+	//		log.Println("cancel order when start:", order.ID, "ret:", cancel)
+	//	}
+	//}
+
+	ftAccount, ftErr := api.GetSubAccount(exchange.FT)
+	if ftErr != nil {
+		log.Println(ftErr)
+	} else {
+		log.Println(ftAccount)
+	}
+
+	fmAccount, fmErr := api.GetSubAccount(exchange.FMEX)
+	if fmErr != nil {
+		log.Println(fmErr)
+	} else {
+		log.Println(fmAccount)
 	}
 
 	// main quant
 	for {
-		ticker, err := api.GetTicker(symbol)
-		if err != nil {
-			log.Println("usdt account got error:", err)
-			continue
-		} else {
-			curBuyPrice = ticker.Buy
-			curSellPrice = ticker.Sell
-			log.Println("bid price:", curBuyPrice)
-			log.Println("ask price:", curSellPrice)
-		}
-
-		orders, _ := api.GetActiveOrders(symbol)
-		if len(orders) > 0 {
-			for _, order := range orders {
-				if order.Side == "buy" {
-					if order.Price != curBuyPrice {
-						cancel, _ := api.CancelOrder(order.ID, symbol)
-						log.Println("cancel buy:", order.ID, "ret:", cancel)
-					}
-				} else if order.Side == "sell" {
-					if order.Price != curSellPrice {
-						cancel, _ := api.CancelOrder(order.ID, symbol)
-						log.Println("cancel sell:", order.ID, "ret:", cancel)
-					}
-				}
-			}
-		}
-
-		usdtAccount, err := api.GetSubAccount(baseCurrency)
-		if err != nil {
-			log.Println("usdt account got error:", err)
-		} else {
-			if usdtAccount.Available > availableLimit {
-				isOrderable, _ := api.IsOrderable(symbol)
-				if isOrderable {
-					if maxBuyPrice > 0 && curBuyPrice > maxBuyPrice {
-						log.Println("limit buy exceeded limit price:", curBuyPrice)
-					} else {
-						amount := (usdtAccount.Available - 1) / curBuyPrice
-						if amount > 1 {
-							buyOrder, err := api.LimitBuy(exchange.FloatToStringForEx(amount), exchange.FloatToStringForEx(curBuyPrice), symbol)
-							if err != nil {
-								log.Println("limit buy amount:", amount, "price:", curBuyPrice, "error:", err)
-							} else {
-								log.Println("limit buy amount:", amount, "price:", curBuyPrice, "success:", buyOrder.ID)
-								lastBuyPrice = curBuyPrice
-								minSellPrice = curBuyPrice * downRise
-							}
-						}
-					}
-				} else {
-					log.Println("limit buy isOrderable:", false)
-				}
-			}
-		}
-
-		currencyAccount, err := api.GetSubAccount(quoteCurrency)
-		if err != nil {
-			log.Println("currency account got error:", err)
-		} else {
-			if currencyAccount.Available > availableLimit {
-				isOrderable, _ := api.IsOrderable(symbol)
-				if isOrderable {
-					if minSellPrice > 0 && curSellPrice < minSellPrice {
-						log.Println("limit sell exceeded limit price:", curSellPrice)
-					} else {
-						amount := currencyAccount.Available - 1
-						if amount > 1 {
-							sellOrder, err := api.LimitSell(exchange.FloatToStringForEx(amount), exchange.FloatToStringForEx(curSellPrice), symbol)
-							if err != nil {
-								log.Println("limit sell amount:", amount, "price:", curSellPrice, "error:", err)
-							} else {
-								log.Println("limit sell amount:", amount, "price:", curSellPrice, "success:", sellOrder.ID)
-								lastSellPrice = curSellPrice
-								maxBuyPrice = curSellPrice * upRise
-							}
-						}
-					}
-				} else {
-					log.Println("limit sell isOrderable:", false)
-				}
-			}
-		}
+		//ticker, err := api.GetTicker(symbol)
+		//if err != nil {
+		//	log.Println("usdt account got error:", err)
+		//	continue
+		//} else {
+		//	curBuyPrice = ticker.Buy
+		//	curSellPrice = ticker.Sell
+		//	log.Println("bid price:", curBuyPrice)
+		//	log.Println("ask price:", curSellPrice)
+		//}
+		//
+		//orders, _ := api.GetActiveOrders(symbol)
+		//if len(orders) > 0 {
+		//	for _, order := range orders {
+		//		if order.Side == "buy" {
+		//			if order.Price != curBuyPrice {
+		//				cancel, _ := api.CancelOrder(order.ID, symbol)
+		//				log.Println("cancel buy:", order.ID, "ret:", cancel)
+		//			}
+		//		} else if order.Side == "sell" {
+		//			if order.Price != curSellPrice {
+		//				cancel, _ := api.CancelOrder(order.ID, symbol)
+		//				log.Println("cancel sell:", order.ID, "ret:", cancel)
+		//			}
+		//		}
+		//	}
+		//}
+		//
+		//usdtAccount, err := api.GetSubAccount(baseCurrency)
+		//if err != nil {
+		//	log.Println("usdt account got error:", err)
+		//} else {
+		//	if usdtAccount.Available > availableLimit {
+		//		isOrderable, _ := api.IsOrderable(symbol)
+		//		if isOrderable {
+		//			if maxBuyPrice > 0 && curBuyPrice > maxBuyPrice {
+		//				log.Println("limit buy exceeded limit price:", curBuyPrice)
+		//			} else {
+		//				amount := (usdtAccount.Available - 1) / curBuyPrice
+		//				if amount > 1 {
+		//					buyOrder, err := api.LimitBuy(exchange.FloatToStringForEx(amount), exchange.FloatToStringForEx(curBuyPrice), symbol)
+		//					if err != nil {
+		//						log.Println("limit buy amount:", amount, "price:", curBuyPrice, "error:", err)
+		//					} else {
+		//						log.Println("limit buy amount:", amount, "price:", curBuyPrice, "success:", buyOrder.ID)
+		//						lastBuyPrice = curBuyPrice
+		//						minSellPrice = curBuyPrice * downRise
+		//					}
+		//				}
+		//			}
+		//		} else {
+		//			log.Println("limit buy isOrderable:", false)
+		//		}
+		//	}
+		//}
+		//
+		//currencyAccount, err := api.GetSubAccount(quoteCurrency)
+		//if err != nil {
+		//	log.Println("currency account got error:", err)
+		//} else {
+		//	if currencyAccount.Available > availableLimit {
+		//		isOrderable, _ := api.IsOrderable(symbol)
+		//		if isOrderable {
+		//			if minSellPrice > 0 && curSellPrice < minSellPrice {
+		//				log.Println("limit sell exceeded limit price:", curSellPrice)
+		//			} else {
+		//				amount := currencyAccount.Available - 1
+		//				if amount > 1 {
+		//					sellOrder, err := api.LimitSell(exchange.FloatToStringForEx(amount), exchange.FloatToStringForEx(curSellPrice), symbol)
+		//					if err != nil {
+		//						log.Println("limit sell amount:", amount, "price:", curSellPrice, "error:", err)
+		//					} else {
+		//						log.Println("limit sell amount:", amount, "price:", curSellPrice, "success:", sellOrder.ID)
+		//						lastSellPrice = curSellPrice
+		//						maxBuyPrice = curSellPrice * upRise
+		//					}
+		//				}
+		//			}
+		//		} else {
+		//			log.Println("limit sell isOrderable:", false)
+		//		}
+		//	}
+		//}
 
 		time.Sleep(250 * time.Millisecond)
 	}
@@ -164,7 +186,7 @@ func sendMessage(api exchange.API, bot *tgbot.BotAPI, updates tgbot.UpdatesChann
 				"t -> ticker\n" +
 				"m -> states in memory\n" +
 				"start -> start service\n" +
-				"stop -> stop service";
+				"stop -> stop service"
 			msg := tgbot.NewMessage(update.Message.Chat.ID, msgBody)
 			msg.ReplyToMessageID = update.Message.MessageID
 			_, _ = bot.Send(msg)
