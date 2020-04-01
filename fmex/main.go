@@ -14,8 +14,8 @@ import (
 
 const (
 	proxy  = "socks5://127.0.0.1:1086"
-	key    = "30c2a9a181b945afaa7038f5326a2311"
-	secret = "60078bb694424fc481590b4231b3e248"
+	key    = "9a181b945afaa7038f5326a2311"
+	secret = "bb694424fc481590b4231b3e248"
 	bot    = "941710186:AAFS--hy65duDvrBhPQisWIVgVCj8FMixcc"
 )
 
